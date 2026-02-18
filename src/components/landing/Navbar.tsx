@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const navLinks = [
-  { label: "Personal Banking", href: "#" },
-  { label: "Business Banking", href: "#" },
-  { label: "Loans", href: "#" },
-  { label: "Credit Cards", href: "#" },
-  { label: "Investments", href: "#" },
+  { label: "Personal Banking", href: "/#personal" },
+  { label: "Business Banking", href: "/#business" },
+  { label: "Loans", href: "/#loans" },
+  { label: "Credit Cards", href: "/#cards" },
+  { label: "Investments", href: "/#investments" },
   { label: "About Us", href: "/about" },
-  { label: "Support", href: "#" },
+  { label: "Support", href: "/#support" },
 ];
 
 const Navbar = () => {
@@ -52,13 +52,13 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ) : (
-              <a
+              <Link
                 key={link.label}
-                href={link.href}
+                to={link.href}
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 {link.label}
-              </a>
+              </Link>
             )
           )}
         </div>
@@ -90,13 +90,14 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ) : (
-              <a
+              <Link
                 key={link.label}
-                href={link.href}
+                to={link.href}
                 className="block py-2 text-sm text-muted-foreground hover:text-primary"
+                onClick={() => setOpen(false)}
               >
                 {link.label}
-              </a>
+              </Link>
             )
           )}
           <div className="flex gap-2 mt-3">
