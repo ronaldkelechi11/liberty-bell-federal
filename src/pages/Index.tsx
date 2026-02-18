@@ -13,7 +13,7 @@ import AnimatedSection from "@/components/landing/AnimatedSection";
 
 const Index = () => (
   <div className="min-h-screen">
-    <TopBar />
+    {/* <TopBar /> */}
     <Navbar />
     <HeroSection />
     <AnimatedSection>
