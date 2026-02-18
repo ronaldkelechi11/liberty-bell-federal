@@ -64,8 +64,12 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-2">
-          <Button variant="outline" size="sm">Login</Button>
-          <Button size="sm" className="btn-glow">Open Account</Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/login">Login</Link>
+          </Button>
+          <Button size="sm" className="btn-glow" asChild>
+            <Link to="/register">Open Account</Link>
+          </Button>
         </div>
 
         <button className="lg:hidden" onClick={() => setOpen(!open)}>
@@ -96,8 +100,12 @@ const Navbar = () => {
             )
           )}
           <div className="flex gap-2 mt-3">
-            <Button variant="outline" size="sm" className="flex-1">Login</Button>
-            <Button size="sm" className="flex-1">Open Account</Button>
+            <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Link to="/login" onClick={() => setOpen(false)}>Login</Link>
+            </Button>
+            <Button size="sm" className="flex-1" asChild>
+              <Link to="/register" onClick={() => setOpen(false)}>Open Account</Link>
+            </Button>
           </div>
         </div>
       )}
