@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const navLinks = [
-  { label: "Personal Banking", href: "#" },
-  { label: "Business Banking", href: "#" },
-  { label: "Loans", href: "#" },
-  { label: "Credit Cards", href: "#" },
-  { label: "Investments", href: "#" },
+  { label: "Personal Banking", href: "/#personal" },
+  { label: "Business Banking", href: "/#business" },
+  { label: "Loans", href: "/#loans" },
+  { label: "Credit Cards", href: "/#cards" },
+  { label: "Investments", href: "/#investments" },
   { label: "About Us", href: "/about" },
-  { label: "Support", href: "#" },
+  { label: "Support", href: "/#support" },
 ];
 
 const Navbar = () => {
@@ -52,20 +52,24 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ) : (
-              <a
+              <Link
                 key={link.label}
-                href={link.href}
+                to={link.href}
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 {link.label}
-              </a>
+              </Link>
             )
           )}
         </div>
 
         <div className="hidden lg:flex items-center gap-2">
-          <Button variant="outline" size="sm">Login</Button>
-          <Button size="sm" className="btn-glow">Open Account</Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/login">Login</Link>
+          </Button>
+          <Button size="sm" className="btn-glow" asChild>
+            <Link to="/register">Open Account</Link>
+          </Button>
         </div>
 
         <button className="lg:hidden" onClick={() => setOpen(!open)}>
@@ -86,18 +90,23 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ) : (
-              <a
+              <Link
                 key={link.label}
-                href={link.href}
+                to={link.href}
                 className="block py-2 text-sm text-muted-foreground hover:text-primary"
+                onClick={() => setOpen(false)}
               >
                 {link.label}
-              </a>
+              </Link>
             )
           )}
           <div className="flex gap-2 mt-3">
-            <Button variant="outline" size="sm" className="flex-1">Login</Button>
-            <Button size="sm" className="flex-1">Open Account</Button>
+            <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Link to="/login" onClick={() => setOpen(false)}>Login</Link>
+            </Button>
+            <Button size="sm" className="flex-1" asChild>
+              <Link to="/register" onClick={() => setOpen(false)}>Open Account</Link>
+            </Button>
           </div>
         </div>
       )}
