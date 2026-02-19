@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import SetupWizard from "../auth/SetupWizard";
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,6 +86,7 @@ const DashboardLayout = ({ children, isAdmin }: DashboardLayoutProps) => {
       </div>
 
       <BottomNav />
+      <SetupWizard />
     </div>
   );
 };
