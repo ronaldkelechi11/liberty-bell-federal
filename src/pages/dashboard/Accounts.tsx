@@ -1,14 +1,17 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet, Plus, ChevronRight, MoreVertical } from "lucide-react";
+import { Wallet, Plus, MoreVertical } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Link } from "react-router-dom";
+import NewAccountModal from "@/components/dashboard/NewAccountModal";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Accounts = () => {
+  const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => accountService.getMyAccounts(),
@@ -22,7 +25,10 @@ const Accounts = () => {
             <h1 className="text-2xl font-heading font-bold">Your Accounts</h1>
             <p className="text-muted-foreground">Manage and monitor all your bank accounts in one place.</p>
           </div>
-          <Button className="rounded-xl gap-2">
+          <Button
+            className="rounded-xl gap-2"
+            onClick={() => setIsNewAccountModalOpen(true)}
+          >
             <Plus className="w-4 h-4" /> Open Account
           </Button>
         </div>
@@ -90,6 +96,10 @@ const Accounts = () => {
           )}
         </div>
       </div>
+      <NewAccountModal
+        isOpen={isNewAccountModalOpen}
+        onOpenChange={setIsNewAccountModalOpen}
+      />
     </DashboardLayout>
   );
 };
