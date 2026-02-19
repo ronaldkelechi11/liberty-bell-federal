@@ -19,9 +19,10 @@ interface OtpModalProps {
   onClose: () => void;
   onVerify: (otp: string) => void;
   emailOrPhone: string;
+  isLoading?: boolean;
 }
 
-const OtpModal = ({ isOpen, onClose, onVerify, emailOrPhone }: OtpModalProps) => {
+const OtpModal = ({ isOpen, onClose, onVerify, emailOrPhone, isLoading = false }: OtpModalProps) => {
   const [otp, setOtp] = React.useState("");
 
   const handleVerify = () => {
@@ -47,20 +48,18 @@ const OtpModal = ({ isOpen, onClose, onVerify, emailOrPhone }: OtpModalProps) =>
             maxLength={6}
             value={otp}
             onChange={(value) => setOtp(value)}
-            render={({ slots }) => (
-              <InputOTPGroup className="gap-2">
-                {slots.map((slot, index) => (
-                  <InputOTPSlot
-                    key={index}
-                    {...slot}
-                    className="w-12 h-12 text-lg border-2 rounded-md"
-                  />
-                ))}
-              </InputOTPGroup>
-            )}
-          />
+          >
+            <InputOTPGroup className="gap-2">
+              <InputOTPSlot index={0} className="w-12 h-12 text-lg border-2 rounded-md" />
+              <InputOTPSlot index={1} className="w-12 h-12 text-lg border-2 rounded-md" />
+              <InputOTPSlot index={2} className="w-12 h-12 text-lg border-2 rounded-md" />
+              <InputOTPSlot index={3} className="w-12 h-12 text-lg border-2 rounded-md" />
+              <InputOTPSlot index={4} className="w-12 h-12 text-lg border-2 rounded-md" />
+              <InputOTPSlot index={5} className="w-12 h-12 text-lg border-2 rounded-md" />
+            </InputOTPGroup>
+          </InputOTP>
           <div className="mt-8 w-full space-y-4">
-            <Button className="w-full btn-glow" onClick={handleVerify}>
+            <Button className="w-full btn-glow" onClick={handleVerify} loading={isLoading}>
               Verify & Login
             </Button>
             <div className="text-center">

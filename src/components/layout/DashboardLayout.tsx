@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import SetupWizard from "../auth/SetupWizard";
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, isAdmin }: DashboardLayoutProps) => {
   return (
     <div className="flex min-h-screen bg-secondary/20">
+      <SetupWizard />
       <Sidebar isAdmin={isAdmin} />
 
       <div className="flex-1 flex flex-col min-w-0">

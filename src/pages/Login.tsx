@@ -27,8 +27,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loginData, setLoginData] = useState<LoginFormValues | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
@@ -40,19 +42,33 @@ const Login = () => {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    setIsLoading(true);
     try {
-      const response = await authService.login(values);
+      const response = await authService.login(values) as { message: string; userId: string; token?: string; user?: any };
+
+      // If the backend returns a token and user directly (for admins or bypassed users)
+      if (response.token && response.user) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        toast.success(`Welcome back, ${response.user.firstname}!`);
+        navigate(response.user.role === 'admin' ? "/admin" : "/dashboard");
+        return;
+      }
+
       setUserId(response.userId);
       setLoginData(values);
       setShowOtpModal(true);
       toast.success("Credentials valid! Please verify OTP.");
     } catch (error: any) {
       toast.error(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleOtpVerify = async (otp: string) => {
     if (!userId) return;
+    setIsVerifyingOtp(true);
     try {
       const response = await authService.verifyLoginOtp({
         userId,
@@ -64,9 +80,11 @@ const Login = () => {
 
       toast.success("Identity verified! Welcome back.");
       setShowOtpModal(false);
-      navigate("/dashboard");
+      navigate(response.user.role === 'admin' ? "/admin" : "/dashboard");
     } catch (error: any) {
       toast.error(error.message || "OTP verification failed");
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -163,7 +181,7 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full btn-glow" size="lg">
+              <Button type="submit" className="w-full btn-glow" size="lg" loading={isLoading}>
                 Sign In
               </Button>
             </form>
@@ -175,6 +193,12 @@ const Login = () => {
               Create an account
             </Link>
           </p>
+          <p className="text-center mt-2 text-sm text-muted-foreground">
+            Need to verify your email?{" "}
+            <Link to="/verify-email" className="text-primary font-bold hover:underline">
+              Verify Email
+            </Link>
+          </p>
         </div>
       </div>
 
@@ -182,6 +206,7 @@ const Login = () => {
         isOpen={showOtpModal}
         onClose={() => setShowOtpModal(false)}
         onVerify={handleOtpVerify}
+        isLoading={isVerifyingOtp}
         emailOrPhone={loginData?.username || "your registered device"}
       />
     </div>

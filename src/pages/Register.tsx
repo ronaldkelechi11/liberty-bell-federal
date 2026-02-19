@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -78,6 +79,7 @@ const securityQuestions = [
 ];
 
 const Register = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -108,6 +110,7 @@ const Register = () => {
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
+    setIsLoading(true);
     try {
       const dto = {
         firstname: values.firstName,
@@ -135,6 +138,8 @@ const Register = () => {
       navigate("/login");
     } catch (error: any) {
       toast.error(error.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -586,7 +591,7 @@ const Register = () => {
                 </p>
               </section>
 
-              <Button type="submit" className="w-full btn-glow" size="xl">
+              <Button type="submit" className="w-full btn-glow" size="xl" loading={isLoading}>
                 Create Account
               </Button>
             </form>

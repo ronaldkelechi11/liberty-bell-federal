@@ -12,6 +12,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Transfers = () => {
   const [amount, setAmount] = useState("");
+  const [isTransferring, setIsTransferring] = useState(false);
+
+  const handleTransfer = () => {
+    setIsTransferring(true);
+    setTimeout(() => {
+      setIsTransferring(false);
+    }, 2000);
+  };
 
   const accounts = [
     { id: '1', type: 'Checking', balance: 12500.50, number: '**** 4582' },
@@ -97,7 +105,11 @@ const Transfers = () => {
                       <Textarea placeholder="What's this for?" className="rounded-xl resize-none" rows={3} />
                     </div>
 
-                    <Button className="w-full h-12 rounded-xl text-lg font-bold gap-2">
+                    <Button
+                      className="w-full h-12 rounded-xl text-lg font-bold gap-2"
+                      onClick={handleTransfer}
+                      loading={isTransferring}
+                    >
                       Transfer Funds <ArrowRightCircle className="w-5 h-5" />
                     </Button>
                   </CardContent>
@@ -159,7 +171,11 @@ const Transfers = () => {
                       <Textarea placeholder="Note for recipient" className="rounded-xl resize-none" rows={3} />
                     </div>
 
-                    <Button className="w-full h-12 rounded-xl text-lg font-bold gap-2">
+                    <Button
+                      className="w-full h-12 rounded-xl text-lg font-bold gap-2"
+                      onClick={handleTransfer}
+                      loading={isTransferring}
+                    >
                       Send Funds <Send className="w-5 h-5" />
                     </Button>
                   </CardContent>
