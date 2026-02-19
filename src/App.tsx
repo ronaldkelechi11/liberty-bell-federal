@@ -10,6 +10,21 @@ import Register from "./pages/Register";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 
+// Dashboard Pages
+import Overview from "./pages/dashboard/Overview";
+import Accounts from "./pages/dashboard/Accounts";
+import AccountDetail from "./pages/dashboard/AccountDetail";
+import Transfers from "./pages/dashboard/Transfers";
+import Cards from "./pages/dashboard/Cards";
+import Investments from "./pages/dashboard/Investments";
+import Notifications from "./pages/dashboard/Notifications";
+import Profile from "./pages/dashboard/Profile";
+
+// Admin Pages
+import Analytics from "./pages/admin/Analytics";
+import UserAccounts from "./pages/admin/UserAccounts";
+import PaymentMethods from "./pages/admin/PaymentMethods";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -24,6 +39,22 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+          {/* User Dashboard Routes */}
+          <Route path="/dashboard" element={<Overview />} />
+          <Route path="/dashboard/accounts" element={<Accounts />} />
+          <Route path="/dashboard/accounts/:id" element={<AccountDetail />} />
+          <Route path="/dashboard/transfers" element={<Transfers />} />
+          <Route path="/dashboard/cards" element={<Cards />} />
+          <Route path="/dashboard/investments" element={<Investments />} />
+          <Route path="/dashboard/notifications" element={<Notifications />} />
+          <Route path="/dashboard/profile" element={<Profile />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<Analytics />} />
+          <Route path="/admin/accounts" element={<UserAccounts />} />
+          <Route path="/admin/payments" element={<PaymentMethods />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

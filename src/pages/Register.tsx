@@ -24,6 +24,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import { authService } from "@/api/auth";
+import { AccountType } from "@/api/types";
 
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -44,7 +46,7 @@ const registerSchema = z.object({
   state: z.string().min(1, "Please select a state"),
   zipCode: z.string().min(5, "Valid ZIP code is required"),
   country: z.string().default("United States"),
-  accountType: z.enum(["Checking", "Savings", "Current / Premium"], {
+  accountType: z.enum(["Checking", "Savings", "Current / Premium", "Investment", "BTC"], {
     required_error: "Please select an account type",
   }),
   securityQuestion: z.string().min(1, "Please select a security question"),
@@ -105,10 +107,35 @@ const Register = () => {
     },
   });
 
-  const onSubmit = (values: RegisterFormValues) => {
-    console.log("Registration attempt:", values);
-    toast.success("Account created successfully!");
-    navigate("/login");
+  const onSubmit = async (values: RegisterFormValues) => {
+    try {
+      const dto = {
+        firstname: values.firstName,
+        lastname: values.lastName,
+        age: Number(values.age),
+        maritalStatus: values.maritalStatus,
+        dob: values.dob,
+        phoneNumber: values.phoneNumber,
+        streetAddress: values.streetAddress,
+        apartment: values.apartment,
+        city: values.city,
+        state: values.state,
+        zipCode: values.zipCode,
+        country: values.country,
+        accountType: (values.accountType === "Current / Premium" ? "current" : values.accountType.toLowerCase()) as AccountType,
+        securityQuestion: values.securityQuestion,
+        securityAnswer: values.securityAnswer,
+        username: values.username,
+        email: values.email,
+        password: values.password,
+      };
+
+      await authService.register(dto);
+      toast.success("Account created successfully! Please log in.");
+      navigate("/login");
+    } catch (error: any) {
+      toast.error(error.message || "Registration failed");
+    }
   };
 
   return (

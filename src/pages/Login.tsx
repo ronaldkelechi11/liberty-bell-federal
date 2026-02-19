@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import OtpModal from "@/components/auth/OtpModal";
+import { authService } from "@/api/auth";
 
 const loginSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
@@ -26,6 +27,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loginData, setLoginData] = useState<LoginFormValues | null>(null);
   const navigate = useNavigate();
 
@@ -37,20 +39,35 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (values: LoginFormValues) => {
-    // Simulate API call
-    console.log("Login attempt:", values);
-    setLoginData(values);
-    setShowOtpModal(true);
-    toast.success("Login successful! Please verify OTP.");
+  const onSubmit = async (values: LoginFormValues) => {
+    try {
+      const response = await authService.login(values);
+      setUserId(response.userId);
+      setLoginData(values);
+      setShowOtpModal(true);
+      toast.success("Credentials valid! Please verify OTP.");
+    } catch (error: any) {
+      toast.error(error.message || "Login failed");
+    }
   };
 
-  const handleOtpVerify = (otp: string) => {
-    // Simulate OTP verification
-    console.log("OTP verified:", otp);
-    toast.success("Identity verified! Welcome back.");
-    setShowOtpModal(false);
-    navigate("/");
+  const handleOtpVerify = async (otp: string) => {
+    if (!userId) return;
+    try {
+      const response = await authService.verifyLoginOtp({
+        userId,
+        otp
+      });
+
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+
+      toast.success("Identity verified! Welcome back.");
+      setShowOtpModal(false);
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error.message || "OTP verification failed");
+    }
   };
 
   return (
