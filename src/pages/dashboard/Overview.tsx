@@ -13,26 +13,28 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
+import { profileService } from "@/api/profile";
+import { cardService } from "@/api/cards";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Overview = () => {
-  const { data: accountsData, isLoading: accountsLoading } = useQuery({
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => profileService.getProfile(),
+  });
+
+  const { data: accounts = [], isLoading: accountsLoading } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => accountService.getMyAccounts(),
     retry: false,
   });
 
-  const accounts = accountsData || [
-    { id: '1', type: 'checking', balance: 12500.50, accountNumber: '**** 4582' },
-    { id: '2', type: 'savings', balance: 45000.00, accountNumber: '**** 1290' },
-  ];
+  const { data: cards = [] } = useQuery({
+    queryKey: ['cards'],
+    queryFn: () => cardService.getCards(),
+  });
 
-  const transactions = [
-    { id: '1', title: 'Apple Store', date: 'Oct 24, 2023', amount: -999.00, category: 'Electronics', status: 'Completed' },
-    { id: '2', title: 'Salary Deposit', date: 'Oct 23, 2023', amount: 5000.00, category: 'Income', status: 'Completed' },
-    { id: '3', title: 'Starbucks', date: 'Oct 22, 2023', amount: -15.50, category: 'Food & Drink', status: 'Completed' },
-    { id: '4', title: 'Netflix Subscription', date: 'Oct 20, 2023', amount: -19.99, category: 'Entertainment', status: 'Completed' },
-  ];
+  const transactions: any[] = [];
 
   const totalBalance = accounts.reduce((acc, curr) => acc + curr.balance, 0);
 
@@ -40,7 +42,9 @@ const Overview = () => {
     <DashboardLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-heading font-bold">Good morning, John</h1>
+          <h1 className="text-2xl font-heading font-bold">
+            Good morning, {profile?.firstname || 'User'}
+          </h1>
           <p className="text-muted-foreground">Here's what's happening with your money today.</p>
         </div>
 
@@ -73,10 +77,12 @@ const Overview = () => {
               <TrendingUp className="w-4 h-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$45,000.00</div>
-              <p className="text-xs text-muted-foreground mt-1">Goal: $50,000 (90%)</p>
+              <div className="text-2xl font-bold">
+                ${accounts.filter(a => a.type === 'savings').reduce((acc, curr) => acc + curr.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">From savings accounts</p>
               <div className="mt-4 w-full bg-secondary h-2 rounded-full overflow-hidden">
-                <div className="bg-primary h-full w-[90%]" />
+                <div className="bg-primary h-full w-[0%]" />
               </div>
             </CardContent>
           </Card>
@@ -87,11 +93,11 @@ const Overview = () => {
               <CreditCard className="w-4 h-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground mt-1">2 Physical, 1 Virtual</p>
+              <div className="text-2xl font-bold">{cards.filter(c => c.status === 'active').length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Active cards on your account</p>
               <div className="mt-4 flex -space-x-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-8 h-5 rounded bg-gradient-to-br from-primary to-primary/60 border border-background shadow-sm" />
+                {cards.slice(0, 3).map((card) => (
+                  <div key={card.id} className="w-8 h-5 rounded bg-gradient-to-br from-primary to-primary/60 border border-background shadow-sm" title={card.cardNumber} />
                 ))}
               </div>
             </CardContent>
@@ -109,30 +115,36 @@ const Overview = () => {
             </div>
 
             <Card>
-              <CardContent className="p-0">
-                <div className="divide-y divide-border">
-                  {transactions.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          t.amount < 0 ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
-                        }`}>
-                          {t.amount < 0 ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+              <CardContent className={transactions.length > 0 ? "p-0" : "p-6"}>
+                {transactions.length > 0 ? (
+                  <div className="divide-y divide-border">
+                    {transactions.map((t) => (
+                      <div key={t.id} className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            t.amount < 0 ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
+                          }`}>
+                            {t.amount < 0 ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <p className="font-medium">{t.title}</p>
+                            <p className="text-xs text-muted-foreground">{t.date} • {t.category}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{t.title}</p>
-                          <p className="text-xs text-muted-foreground">{t.date} • {t.category}</p>
+                        <div className="text-right">
+                          <p className={`font-bold ${t.amount < 0 ? "text-foreground" : "text-green-600"}`}>
+                            {t.amount < 0 ? "-" : "+"}${Math.abs(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground uppercase">{t.status}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className={`font-bold ${t.amount < 0 ? "text-foreground" : "text-green-600"}`}>
-                          {t.amount < 0 ? "-" : "+"}${Math.abs(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground uppercase">{t.status}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No recent transactions</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

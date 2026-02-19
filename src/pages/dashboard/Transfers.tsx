@@ -9,14 +9,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Building2, User2, ArrowRightCircle, Info } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useQuery } from "@tanstack/react-query";
+import { accountService } from "@/api/accounts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Transfers = () => {
   const [amount, setAmount] = useState("");
 
-  const accounts = [
-    { id: '1', type: 'Checking', balance: 12500.50, number: '**** 4582' },
-    { id: '2', type: 'Savings', balance: 45000.00, number: '**** 1290' },
-  ];
+  const { data: accounts = [], isLoading } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: () => accountService.getMyAccounts(),
+  });
 
   return (
     <DashboardLayout>
@@ -53,9 +56,11 @@ const Transfers = () => {
                             <SelectValue placeholder="Select account" />
                           </SelectTrigger>
                           <SelectContent>
-                            {accounts.map(acc => (
+                            {isLoading ? (
+                              <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
+                            ) : accounts.map(acc => (
                               <SelectItem key={acc.id} value={acc.id}>
-                                {acc.type} ({acc.number}) - ${acc.balance.toLocaleString()}
+                                <span className="capitalize">{acc.type}</span> ({acc.accountNumber}) - ${acc.balance.toLocaleString()}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -68,9 +73,11 @@ const Transfers = () => {
                             <SelectValue placeholder="Select account" />
                           </SelectTrigger>
                           <SelectContent>
-                            {accounts.map(acc => (
+                            {isLoading ? (
+                              <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
+                            ) : accounts.map(acc => (
                               <SelectItem key={acc.id} value={acc.id}>
-                                {acc.type} ({acc.number}) - ${acc.balance.toLocaleString()}
+                                <span className="capitalize">{acc.type}</span> ({acc.accountNumber}) - ${acc.balance.toLocaleString()}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -118,9 +125,11 @@ const Transfers = () => {
                           <SelectValue placeholder="Select account" />
                         </SelectTrigger>
                         <SelectContent>
-                          {accounts.map(acc => (
+                          {isLoading ? (
+                            <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
+                          ) : accounts.map(acc => (
                             <SelectItem key={acc.id} value={acc.id}>
-                              {acc.type} ({acc.number}) - ${acc.balance.toLocaleString()}
+                              <span className="capitalize">{acc.type}</span> ({acc.accountNumber}) - ${acc.balance.toLocaleString()}
                             </SelectItem>
                           ))}
                         </SelectContent>

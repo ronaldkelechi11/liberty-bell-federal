@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Plus, MoreHorizontal, ShieldCheck, Zap, Lock } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { cardService } from "@/api/cards";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Cards = () => {
-  const cards = [
-    { id: '1', type: 'Physical', brand: 'Visa', number: '4582 1290 3341 8821', holder: 'JOHN DOE', expiry: '12/26', status: 'Active', color: 'bg-primary' },
-    { id: '2', type: 'Virtual', brand: 'Mastercard', number: '5412 8821 4582 3341', holder: 'JOHN DOE', expiry: '05/27', status: 'Active', color: 'bg-zinc-900' },
-  ];
+  const { data: cards = [], isLoading } = useQuery({
+    queryKey: ['cards'],
+    queryFn: () => cardService.getCards(),
+  });
 
   return (
     <DashboardLayout>
@@ -25,55 +28,65 @@ const Cards = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
-            {cards.map((card) => (
-              <div key={card.id} className="group relative">
-                <Card className={`${card.color} border-none text-white overflow-hidden aspect-[1.586/1] md:aspect-auto md:h-56 shadow-xl transition-transform duration-300 hover:-translate-y-1`}>
-                  <CardContent className="p-6 md:p-8 h-full flex flex-col justify-between relative">
-                    <div className="absolute top-0 right-0 p-4 opacity-50">
-                      <CreditCard className="w-32 h-32 -mr-8 -mt-8" />
-                    </div>
-
-                    <div className="flex justify-between items-start relative z-10">
-                      <div>
-                        <Badge variant="secondary" className="bg-white/20 border-none text-white hover:bg-white/30 mb-2 uppercase text-[10px]">
-                          {card.type} Card
-                        </Badge>
-                        <h3 className="text-lg font-bold">{card.brand} Platinum</h3>
+            {isLoading ? (
+              Array(2).fill(0).map((_, i) => (
+                <Skeleton key={i} className="aspect-[1.586/1] md:h-56 rounded-2xl" />
+              ))
+            ) : cards.length > 0 ? (
+              cards.map((card) => (
+                <div key={card.id} className="group relative">
+                  <Card className={`${card.status === 'active' ? 'bg-primary' : 'bg-zinc-500'} border-none text-white overflow-hidden aspect-[1.586/1] md:aspect-auto md:h-56 shadow-xl transition-transform duration-300 hover:-translate-y-1`}>
+                    <CardContent className="p-6 md:p-8 h-full flex flex-col justify-between relative">
+                      <div className="absolute top-0 right-0 p-4 opacity-50">
+                        <CreditCard className="w-32 h-32 -mr-8 -mt-8" />
                       </div>
-                      <div className="w-12 h-10 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-md">
-                        <Zap className="w-6 h-6 fill-white" />
-                      </div>
-                    </div>
 
-                    <div className="relative z-10 mt-auto">
-                      <p className="text-xl md:text-2xl font-mono tracking-widest">{card.number}</p>
-                      <div className="flex justify-between items-end mt-6">
+                      <div className="flex justify-between items-start relative z-10">
                         <div>
-                          <p className="text-[10px] uppercase opacity-60">Card Holder</p>
-                          <p className="font-bold">{card.holder}</p>
+                          <Badge variant="secondary" className="bg-white/20 border-none text-white hover:bg-white/30 mb-2 uppercase text-[10px]">
+                            {card.status} Card
+                          </Badge>
+                          <h3 className="text-lg font-bold">Liberty Platinum</h3>
                         </div>
-                        <div>
-                          <p className="text-[10px] uppercase opacity-60">Expires</p>
-                          <p className="font-bold">{card.expiry}</p>
+                        <div className="w-12 h-10 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-md">
+                          <Zap className="w-6 h-6 fill-white" />
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <div className="mt-4 flex gap-3">
-                  <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
-                    <ShieldCheck className="w-4 h-4" /> Manage
-                  </Button>
-                  <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
-                    <Lock className="w-4 h-4" /> Freeze
-                  </Button>
-                  <Button variant="outline" size="icon" className="rounded-xl">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
+                      <div className="relative z-10 mt-auto">
+                        <p className="text-xl md:text-2xl font-mono tracking-widest">{card.cardNumber}</p>
+                        <div className="flex justify-between items-end mt-6">
+                          <div>
+                            <p className="text-[10px] uppercase opacity-60">Card Holder</p>
+                            <p className="font-bold">{card.cardHolder}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase opacity-60">Expires</p>
+                            <p className="font-bold">{card.expiryDate}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <div className="mt-4 flex gap-3">
+                    <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
+                      <ShieldCheck className="w-4 h-4" /> Manage
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
+                      <Lock className="w-4 h-4" /> {card.status === 'active' ? 'Freeze' : 'Unfreeze'}
+                    </Button>
+                    <Button variant="outline" size="icon" className="rounded-xl">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-12 border-2 border-dashed rounded-2xl">
+                <p className="text-muted-foreground">No cards found.</p>
               </div>
-            ))}
+            )}
           </div>
 
           <div className="space-y-6">

@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, Plus, ArrowUpRight, Clock, ShieldCheck, ChevronRight } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { investmentService } from "@/api/investments";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Investments = () => {
   const plans = [
@@ -11,9 +14,13 @@ const Investments = () => {
     { id: 'advanced', name: 'Advanced Plan', roi: '18.5%', term: '24 Months', min: 10000, description: 'Higher risk for maximum returns.' },
   ];
 
-  const myInvestments = [
-    { id: '1', plan: 'Balanced Plan', amount: 5000, growth: 245.50, status: 'Active', startDate: 'Aug 15, 2023' },
-  ];
+  const { data: myInvestments = [], isLoading } = useQuery({
+    queryKey: ['investments'],
+    queryFn: () => investmentService.getMyInvestments(),
+  });
+
+  const totalInvested = myInvestments.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalProfit = myInvestments.reduce((acc, curr) => acc + (curr.expectedReturns || 0), 0);
 
   return (
     <DashboardLayout>
@@ -32,27 +39,31 @@ const Investments = () => {
           <Card className="bg-primary text-primary-foreground border-none">
             <CardContent className="p-6">
               <p className="text-sm opacity-80 uppercase tracking-wider font-medium">Total Invested</p>
-              <p className="text-3xl font-bold mt-2">$5,000.00</p>
+              <p className="text-3xl font-bold mt-2">
+                ${totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </p>
               <div className="flex items-center gap-1 mt-4 text-green-300">
                 <ArrowUpRight className="w-4 h-4" />
-                <span className="text-sm font-bold">+4.9%</span>
-                <span className="text-xs opacity-70 ml-1">total profit</span>
+                <span className="text-sm font-bold">Live</span>
+                <span className="text-xs opacity-70 ml-1">tracking active plans</span>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium">Current Profit</p>
-              <p className="text-3xl font-bold mt-2 text-green-600">+$245.50</p>
-              <p className="text-xs text-muted-foreground mt-4">Calculated across all active plans</p>
+              <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium">Expected Profit</p>
+              <p className="text-3xl font-bold mt-2 text-green-600">
+                +${totalProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-4">Calculated at maturity</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
               <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium">Active Plans</p>
-              <p className="text-3xl font-bold mt-2">1</p>
+              <p className="text-3xl font-bold mt-2">{myInvestments.length}</p>
               <div className="flex items-center gap-2 mt-4">
-                <Badge variant="secondary" className="bg-green-50 text-green-600 border-green-100 uppercase text-[10px]">On Track</Badge>
+                <Badge variant="secondary" className="bg-green-50 text-green-600 border-green-100 uppercase text-[10px]">Active</Badge>
               </div>
             </CardContent>
           </Card>
@@ -90,7 +101,13 @@ const Investments = () => {
 
         <div className="space-y-4 pt-8">
           <h2 className="text-xl font-heading font-bold">Your Portfolio</h2>
-          {myInvestments.length > 0 ? (
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array(1).fill(0).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : myInvestments.length > 0 ? (
             <Card>
               <CardContent className="p-0">
                 <div className="divide-y divide-border">
@@ -101,8 +118,8 @@ const Investments = () => {
                           <TrendingUp className="w-6 h-6" />
                         </div>
                         <div>
-                          <h3 className="font-bold">{inv.plan}</h3>
-                          <p className="text-xs text-muted-foreground">Started on {inv.startDate}</p>
+                          <h3 className="font-bold capitalize">{inv.planId} Plan</h3>
+                          <p className="text-xs text-muted-foreground">Started on {new Date(inv.startDate).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-8 flex-1 md:max-w-md">
@@ -111,8 +128,8 @@ const Investments = () => {
                           <p className="font-bold">${inv.amount.toLocaleString()}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase text-muted-foreground font-semibold">Profit</p>
-                          <p className="font-bold text-green-600">+${inv.growth.toLocaleString()}</p>
+                          <p className="text-[10px] uppercase text-muted-foreground font-semibold">Expected Profit</p>
+                          <p className="font-bold text-green-600">+${(inv.expectedReturns || 0).toLocaleString()}</p>
                         </div>
                         <div>
                           <p className="text-[10px] uppercase text-muted-foreground font-semibold">Status</p>
