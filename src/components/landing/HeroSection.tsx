@@ -2,6 +2,7 @@ import { Shield, Smartphone, Eye, Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+
 const highlights = [
   { icon: Shield, text: "FDIC Insured up to $250,000" },
   { icon: Smartphone, text: "24/7 Online & Mobile Access" },
@@ -46,18 +47,19 @@ const HeroSection = () => (
 
           <div className="flex flex-wrap gap-4">
             <Button size="xl" className="btn-glow group" asChild>
-              <Link to="/register">
+              <Link to="/register" className="p-2">
                 Open an Account
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
-            <Button
+            {/* <Button
               size="xl"
               variant="outline"
               className="px-8 shadow-sm"
             >
+              <Link to={'/#'}
               Learn More
-            </Button>
+            </Button> */}
           </div>
         </div>
 

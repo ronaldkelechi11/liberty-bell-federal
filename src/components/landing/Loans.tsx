@@ -37,10 +37,10 @@ const Loans = () => (
             We offer a variety of loan options with competitive rates and transparent terms to help you achieve your goals.
           </p>
         </div>
-        <Button variant="outline" className="group">
+        {/* <Button variant="outline" className="group">
           View All Loan Products
           <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">

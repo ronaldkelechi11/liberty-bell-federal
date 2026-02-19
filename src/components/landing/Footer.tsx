@@ -14,6 +14,10 @@ const Footer = () => (
           </div>
           <p className="text-sm leading-relaxed">
             Liberty Bell Federal Bank — banking that grows with you. Member FDIC.
+            <br />
+          </p>
+          <p className="text-sm leading-relaxed text-white">
+          Ohio, United States of America.
           </p>
         </div>
         <div>

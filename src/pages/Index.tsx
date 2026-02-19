@@ -44,9 +44,9 @@ const Index = () => (
     <AnimatedSection>
       <Testimonials />
     </AnimatedSection>
-    <AnimatedSection>
+    {/* <AnimatedSection>
       <MobileApp />
-    </AnimatedSection>
+    </AnimatedSection> */}
     <AnimatedSection>
       <AboutUsSection />
     </AnimatedSection>
