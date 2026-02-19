@@ -27,6 +27,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loginData, setLoginData] = useState<LoginFormValues | null>(null);
   const navigate = useNavigate();
@@ -40,6 +42,7 @@ const Login = () => {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    setIsLoading(true);
     try {
       const response = await authService.login(values);
       setUserId(response.userId);
@@ -48,11 +51,14 @@ const Login = () => {
       toast.success("Credentials valid! Please verify OTP.");
     } catch (error: any) {
       toast.error(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleOtpVerify = async (otp: string) => {
     if (!userId) return;
+    setIsOtpLoading(true);
     try {
       const response = await authService.verifyLoginOtp({
         userId,
@@ -67,6 +73,8 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "OTP verification failed");
+    } finally {
+      setIsOtpLoading(false);
     }
   };
 
@@ -149,9 +157,14 @@ const Login = () => {
                   <FormItem>
                     <div className="flex items-center justify-between">
                       <FormLabel>Password</FormLabel>
-                      <Link to="#" className="text-xs text-primary hover:underline font-medium">
-                        Forgot password?
-                      </Link>
+                      <div className="flex gap-4">
+                        <Link to="/verify-email" className="text-xs text-primary hover:underline font-medium">
+                          Verify email?
+                        </Link>
+                        <Link to="#" className="text-xs text-primary hover:underline font-medium">
+                          Forgot password?
+                        </Link>
+                      </div>
                     </div>
                     <FormControl>
                       <div className="relative">
@@ -163,7 +176,7 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full btn-glow" size="lg">
+              <Button type="submit" className="w-full btn-glow" size="lg" loading={isLoading}>
                 Sign In
               </Button>
             </form>
@@ -183,6 +196,7 @@ const Login = () => {
         onClose={() => setShowOtpModal(false)}
         onVerify={handleOtpVerify}
         emailOrPhone={loginData?.username || "your registered device"}
+        loading={isOtpLoading}
       />
     </div>
   );
