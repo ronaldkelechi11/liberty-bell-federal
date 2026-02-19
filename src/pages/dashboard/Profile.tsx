@@ -5,17 +5,31 @@ import { Label } from "@/components/ui/label";
 import { User, Mail, Phone, MapPin, Camera, ShieldCheck, Lock, ChevronRight } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { profileService } from "@/api/profile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Profile = () => {
-  const user = {
-    firstname: 'John',
-    lastname: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 000-0000',
-    address: '123 Main St, Apt 4B, New York, NY 10001',
-    username: 'johndoe',
-    joined: 'Jan 2023'
-  };
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => profileService.getProfile(),
+  });
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-4xl mx-auto space-y-8">
+          <Skeleton className="h-10 w-48" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="lg:col-span-2 h-96 rounded-2xl" />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <DashboardLayout>
@@ -31,8 +45,10 @@ const Profile = () => {
               <CardContent className="space-y-4">
                 <div className="relative inline-block">
                   <Avatar className="h-32 w-32 border-4 border-background shadow-xl mx-auto">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="text-4xl bg-primary/10 text-primary">JD</AvatarFallback>
+                    <AvatarImage src={user.profilePicture} />
+                    <AvatarFallback className="text-4xl bg-primary/10 text-primary">
+                      {user.firstname[0]}{user.lastname[0]}
+                    </AvatarFallback>
                   </Avatar>
                   <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-10 w-10 shadow-lg">
                     <Camera className="w-5 h-5" />
@@ -97,7 +113,7 @@ const Profile = () => {
                     <Label>Phone Number</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input defaultValue={user.phone} className="pl-10 rounded-xl" />
+                      <Input defaultValue={user.phoneNumber} className="pl-10 rounded-xl" />
                     </div>
                   </div>
                 </div>
@@ -105,7 +121,7 @@ const Profile = () => {
                   <Label>Residential Address</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input defaultValue={user.address} className="pl-10 rounded-xl" />
+                    <Input defaultValue={`${user.streetAddress}, ${user.city}, ${user.state} ${user.zipCode}, ${user.country}`} className="pl-10 rounded-xl" />
                   </div>
                 </div>
                 <div className="flex justify-end pt-4">

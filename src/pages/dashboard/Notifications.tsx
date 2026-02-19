@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Bell, CheckCircle2, AlertCircle, Info, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { notificationService } from "@/api/notifications";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Notifications = () => {
-  const notifications = [
-    { id: '1', title: 'Payment Received', message: 'You have received a transfer of $5,000.00 from John Doe.', time: '2 hours ago', type: 'success', isRead: false },
-    { id: '2', title: 'Login Alert', message: 'Your account was logged in from a new device in New York, USA.', time: 'Yesterday', type: 'warning', isRead: true },
-    { id: '3', title: 'Plan Matured', message: 'Your Starter Investment Plan has matured. Check your account for returns.', time: '2 days ago', type: 'info', isRead: true },
-  ];
+  const { data: notifications = [], isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => notificationService.getMyNotifications(),
+  });
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -44,29 +46,39 @@ const Notifications = () => {
         </div>
 
         <div className="space-y-4">
-          {notifications.map((notif) => (
-            <Card key={notif.id} className={`border-none transition-all duration-200 ${notif.isRead ? 'opacity-80' : 'shadow-md border-l-4 border-l-primary'}`}>
-              <CardContent className="p-6">
-                <div className="flex gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${getBg(notif.type)}`}>
-                    {getIcon(notif.type)}
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-bold">{notif.title}</h3>
-                      <span className="text-xs text-muted-foreground">{notif.time}</span>
+          {isLoading ? (
+            Array(3).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-2xl" />
+            ))
+          ) : notifications.length > 0 ? (
+            notifications.map((notif) => (
+              <Card key={notif.id} className={`border-none transition-all duration-200 ${notif.isRead ? 'opacity-80' : 'shadow-md border-l-4 border-l-primary'}`}>
+                <CardContent className="p-6">
+                  <div className="flex gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${getBg('info')}`}>
+                      {getIcon('info')}
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{notif.message}</p>
-                    {!notif.isRead && (
-                      <div className="pt-2">
-                        <Button variant="link" className="p-0 h-auto text-xs font-bold text-primary">Mark as read</Button>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-bold">{notif.title}</h3>
+                        <span className="text-xs text-muted-foreground">{new Date(notif.createdAt).toLocaleDateString()}</span>
                       </div>
-                    )}
+                      <p className="text-sm text-muted-foreground leading-relaxed">{notif.message}</p>
+                      {!notif.isRead && (
+                        <div className="pt-2">
+                          <Button variant="link" className="p-0 h-auto text-xs font-bold text-primary">Mark as read</Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No notifications found.</p>
+            </div>
+          )}
         </div>
 
         <div className="text-center pt-8">
