@@ -1,74 +1,82 @@
-const BASE_URL = import.meta.env.VITE_API_URL;
+import axios from 'axios';
 
-class ApiClient {
-  private getToken() {
-    return localStorage.getItem('token');
-  }
+const apiUrl = import.meta.env.VITE_API_URL;
+const ACCESS_TOKEN = "accessToken";
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const token = this.getToken();
-    const headers: any = {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    };
+export const axiosInstance = axios.create({
+    baseURL: apiUrl,
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
-    if (!(options.body instanceof FormData) && !headers['Content-Type']) {
-      headers['Content-Type'] = 'application/json';
+export const axiosAuthenticatedInstance = axios.create({
+    baseURL: apiUrl,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Add accessToken to HEADER-AUTHORIZATION
+const setAuthHeader = (token: string | null) => {
+    if (token) {
+        axiosAuthenticatedInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+        delete axiosAuthenticatedInstance.defaults.headers.common['Authorization'];
     }
+};
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+// Set Token
+export const setTokens = async (token: string) => {
+    localStorage.setItem(ACCESS_TOKEN, token);
+    setAuthHeader(token);
+};
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-      throw new Error(error.message || 'Something went wrong');
+// Fetch Token
+export const getStoredTokens = async () => ({
+    accessToken: localStorage.getItem(ACCESS_TOKEN),
+});
+
+// Clear Token
+export const clearTokens = async () => {
+    localStorage.removeItem(ACCESS_TOKEN);
+    localStorage.removeItem('user');
+    setAuthHeader(null);
+};
+
+// Initialize auth header from stored token
+export const initializeAuth = async () => {
+    try {
+        const storedToken = localStorage.getItem(ACCESS_TOKEN);
+        if (storedToken) {
+            setAuthHeader(storedToken);
+        }
+    } catch (error) {
+        console.error('Failed to initialize auth:', error);
     }
+};
 
-    if (response.status === 204) {
-      return {} as T;
+// Response interceptor to return data directly and handle errors
+axiosAuthenticatedInstance.interceptors.response.use(
+    (response) => response.data,
+    (error) => {
+        if (error.response?.status === 401) {
+            clearTokens();
+            // Avoid redirecting if we are already on login page to prevent loops
+            if (!window.location.pathname.includes('/login')) {
+                window.location.href = '/login';
+            }
+        }
+        const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+        return Promise.reject(new Error(errorMessage));
     }
+);
 
-    return response.json();
-  }
-
-  get<T>(endpoint: string, options: RequestInit = {}) {
-    return this.request<T>(endpoint, { ...options, method: 'GET' });
-  }
-
-  post<T>(endpoint: string, body?: any, options: RequestInit = {}) {
-    return this.request<T>(endpoint, {
-      ...options,
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
-  }
-
-  patch<T>(endpoint: string, body?: any, options: RequestInit = {}) {
-    return this.request<T>(endpoint, {
-      ...options,
-      method: 'PATCH',
-      body: JSON.stringify(body),
-    });
-  }
-
-  delete<T>(endpoint: string, options: RequestInit = {}) {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
-  }
-
-  upload<T>(endpoint: string, formData: FormData, options: RequestInit = {}) {
-    const token = this.getToken();
-    return this.request<T>(endpoint, {
-      ...options,
-      method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-      },
-      body: formData,
-    });
-  }
-}
-
-export const api = new ApiClient();
+axiosInstance.interceptors.response.use(
+    (response) => response.data,
+    (error) => {
+        const errorMessage = error.response?.data?.message || error.message || 'An error occurred';
+        return Promise.reject(new Error(errorMessage));
+    }
+);
