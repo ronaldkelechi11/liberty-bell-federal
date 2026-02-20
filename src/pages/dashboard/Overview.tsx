@@ -77,7 +77,7 @@ const Overview = () => {
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-heading font-bold">
-            Good morning, {profile?.firstname || 'User'}
+            {profile ? `Good morning, ${profile.firstname || 'User'}` : <Skeleton className="h-8 w-48" />}
           </h1>
           <p className="text-muted-foreground">Here's what's happening with your money today.</p>
         </div>
