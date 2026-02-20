@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import OtpModal from "@/components/auth/OtpModal";
 import { authService } from "@/api/auth";
+import { setTokens } from "@/api/client";
 
 const loginSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
@@ -47,7 +48,7 @@ const Login = () => {
       const response = await authService.login(values);
 
       if (values.username === 'admin@libertybellfederal' && response.token && response.user) {
-        localStorage.setItem('token', response.token);
+        await setTokens(response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
         toast.success("Identity verified! Welcome back.");
         navigate("/dashboard");
@@ -74,7 +75,7 @@ const Login = () => {
         otp
       });
 
-      localStorage.setItem('token', response.token);
+      await setTokens(response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
 
       toast.success("Identity verified! Welcome back.");
