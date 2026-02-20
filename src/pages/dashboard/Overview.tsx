@@ -49,23 +49,28 @@ const Overview = () => {
     retry: false,
   });
 
-  const totalBalance = accounts.reduce((acc, curr) => acc + curr.balance, 0);
+  const totalBalance = Array.isArray(accounts) ? accounts.reduce((acc, curr) => acc + (curr.balance || 0), 0) : 0;
 
-  const totalDailyLimit = accounts.reduce((acc, curr) => acc + (curr.dailyLimit || 0), 0);
+  const totalDailyLimit = Array.isArray(accounts) ? accounts.reduce((acc, curr) => acc + (curr.dailyLimit || 0), 0) : 0;
 
-  const spentToday = transactions
+  const spentToday = Array.isArray(transactions) ? transactions
     .filter(t => {
-      const today = new Date();
-      const tDate = new Date(t.createdAt);
-      return t.type === 'debit' &&
-             tDate.getDate() === today.getDate() &&
-             tDate.getMonth() === today.getMonth() &&
-             tDate.getFullYear() === today.getFullYear();
+      if (!t || !t.createdAt) return false;
+      try {
+        const today = new Date();
+        const tDate = new Date(t.createdAt);
+        return t.type === 'debit' &&
+               tDate.getDate() === today.getDate() &&
+               tDate.getMonth() === today.getMonth() &&
+               tDate.getFullYear() === today.getFullYear();
+      } catch (e) {
+        return false;
+      }
     })
-    .reduce((acc, curr) => acc + Math.abs(curr.amount), 0);
+    .reduce((acc, curr) => acc + Math.abs(curr.amount || 0), 0) : 0;
 
-  const remainingLimit = Math.max(0, totalDailyLimit - spentToday);
-  const limitUsagePercent = totalDailyLimit > 0 ? (spentToday / totalDailyLimit) * 100 : 0;
+  const remainingLimit = Math.max(0, (totalDailyLimit || 0) - (spentToday || 0));
+  const limitUsagePercent = totalDailyLimit > 0 ? ((spentToday || 0) / totalDailyLimit) * 100 : 0;
 
   const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -91,7 +96,7 @@ const Overview = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {accountsLoading ? <Skeleton className="h-9 w-32 bg-white/20" /> : `$${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                        {accountsLoading ? <Skeleton className="h-9 w-32 bg-white/20" /> : `$${(totalBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
               </div>
               <p className="text-xs mt-1 opacity-70">+2.5% from last month</p>
               <div className="flex gap-2 mt-6">
@@ -112,9 +117,9 @@ const Overview = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${remainingLimit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${(remainingLimit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Remaining from ${totalDailyLimit.toLocaleString()} limit</p>
+              <p className="text-xs text-muted-foreground mt-1">Remaining from ${(totalDailyLimit || 0).toLocaleString()} limit</p>
               <div className="mt-4">
                 <Slider
                   value={[limitUsagePercent]}
@@ -133,11 +138,11 @@ const Overview = () => {
               <CreditCard className="w-4 h-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{cards.filter(c => c.status === 'active').length}</div>
+              <div className="text-2xl font-bold">{Array.isArray(cards) ? cards.filter(c => c && c.status === 'active').length : 0}</div>
               <p className="text-xs text-muted-foreground mt-1">Active cards on your account</p>
               <div className="mt-4 flex -space-x-2">
-                {cards.slice(0, 3).map((card) => (
-                  <div key={card.id} className="w-8 h-5 rounded bg-gradient-to-br from-primary to-primary/60 border border-background shadow-sm" title={card.cardNumber} />
+                {Array.isArray(cards) && cards.slice(0, 3).map((card, index) => (
+                  <div key={card?.id || index} className="w-8 h-5 rounded bg-gradient-to-br from-primary to-primary/60 border border-background shadow-sm" title={card?.cardNumber} />
                 ))}
               </div>
             </CardContent>
@@ -155,8 +160,8 @@ const Overview = () => {
             </div>
 
             <Card>
-              <CardContent className={transactions.length > 0 ? "p-0" : "p-6"}>
-                {transactions.length > 0 ? (
+            <CardContent className={(Array.isArray(transactions) && transactions.length > 0) ? "p-0" : "p-6"}>
+              {(Array.isArray(transactions) && transactions.length > 0) ? (
                   <div className="divide-y divide-border">
                     {transactions.slice(0, 5).map((t) => (
                       <div
@@ -172,12 +177,14 @@ const Overview = () => {
                           </div>
                           <div>
                             <p className="font-medium">{t.description}</p>
-                            <p className="text-xs text-muted-foreground">{format(new Date(t.createdAt), 'MMM dd, yyyy')} • {t.category}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {t.createdAt ? format(new Date(t.createdAt), 'MMM dd, yyyy') : 'N/A'} • {t.category}
+                            </p>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className={`font-bold ${t.type === 'debit' ? "text-foreground" : "text-green-600"}`}>
-                            {t.type === 'debit' ? "-" : "+"}${Math.abs(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {t.type === 'debit' ? "-" : "+"}${(Math.abs(t.amount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </p>
                           <p className="text-[10px] text-muted-foreground uppercase">{t.status}</p>
                         </div>
@@ -203,7 +210,7 @@ const Overview = () => {
             </div>
 
             <div className="space-y-4">
-              {accounts.map((acc) => (
+              {Array.isArray(accounts) && accounts.map((acc) => (
                 <Card key={acc.id} className="hover:border-primary/50 transition-colors cursor-pointer group">
                   <CardContent className="p-4 flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
@@ -215,7 +222,7 @@ const Overview = () => {
                           <p className="font-bold capitalize">{acc.type} Account</p>
                           <p className="text-xs text-muted-foreground">{(acc as any).number || (acc as any).accountNumber}</p>
                         </div>
-                        <p className="font-bold">${acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                        <p className="font-bold">${(acc.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                       </div>
                     </div>
                   </CardContent>
