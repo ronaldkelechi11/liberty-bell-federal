@@ -47,7 +47,7 @@ const Profile = () => {
                   <Avatar className="h-32 w-32 border-4 border-background shadow-xl mx-auto">
                     <AvatarImage src={user.profilePicture} />
                     <AvatarFallback className="text-4xl bg-primary/10 text-primary">
-                      {user.firstname[0]}{user.lastname[0]}
+                      {user.firstname?.[0] || ''}{user.lastname?.[0] || ''}
                     </AvatarFallback>
                   </Avatar>
                   <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-10 w-10 shadow-lg">
@@ -55,7 +55,7 @@ const Profile = () => {
                   </Button>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">{user.firstname} {user.lastname}</h2>
+                  <h2 className="text-2xl font-bold">{user.firstname || ''} {user.lastname || ''}</h2>
                   <p className="text-sm text-muted-foreground">@{user.username}</p>
                 </div>
                 <div className="pt-4 flex flex-wrap justify-center gap-2">
@@ -92,14 +92,14 @@ const Profile = () => {
                     <Label>First Name</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input defaultValue={user.firstname} className="pl-10 rounded-xl" />
+                      <Input defaultValue={user.firstname || ''} className="pl-10 rounded-xl" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Last Name</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input defaultValue={user.lastname} className="pl-10 rounded-xl" />
+                      <Input defaultValue={user.lastname || ''} className="pl-10 rounded-xl" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -121,7 +121,7 @@ const Profile = () => {
                   <Label>Residential Address</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input defaultValue={`${user.streetAddress}, ${user.city}, ${user.state} ${user.zipCode}, ${user.country}`} className="pl-10 rounded-xl" />
+                    <Input defaultValue={`${user.streetAddress || ''}, ${user.city || ''}, ${user.state || ''} ${user.zipCode || ''}, ${user.country || ''}`} className="pl-10 rounded-xl" />
                   </div>
                 </div>
                 <div className="flex justify-end pt-4">

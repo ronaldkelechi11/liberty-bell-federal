@@ -33,14 +33,22 @@ const SetupWizard = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        // Initial check from localStorage to avoid flashing for admins
+        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        if (storedUser?.role === 'admin') return;
+
         const userData = await profileService.getProfile();
         setUser(userData);
 
+        if (userData?.role === 'admin') return;
+
         // Check if setup is needed
-        if (!userData.profilePicture || !userData.hasTransferPin) {
+        if (userData && (!userData.profilePicture || !userData.hasTransferPin)) {
           setIsOpen(true);
           if (userData.profilePicture) {
             setStep(2); // Skip to PIN setup if picture is already there
+          } else {
+            setStep(1); // Start with profile picture
           }
         }
       } catch (error) {
@@ -123,7 +131,7 @@ const SetupWizard = () => {
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px] overflow-hidden" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="text-2xl font-heading font-bold text-center">
@@ -167,14 +175,18 @@ const SetupWizard = () => {
               <Button className="w-full btn-glow" onClick={handleUploadPicture} loading={isLoading}>
                 Continue
               </Button>
-              {!user?.hasTransferPin && (
-                <button
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors underline"
-                  onClick={() => setStep(2)}
-                >
-                  Skip for now
-                </button>
-              )}
+              <button
+                className="text-sm text-muted-foreground hover:text-primary transition-colors underline"
+                onClick={() => {
+                  if (!user?.hasTransferPin) {
+                    setStep(2);
+                  } else {
+                    setIsOpen(false);
+                  }
+                }}
+              >
+                Skip for now
+              </button>
             </div>
           )}
 
@@ -205,6 +217,14 @@ const SetupWizard = () => {
               <Button className="w-full btn-glow" onClick={handleSetPin} loading={isLoading}>
                 Set PIN
               </Button>
+              <div className="text-center">
+                <button
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors underline"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Skip for now
+                </button>
+              </div>
             </div>
           )}
 

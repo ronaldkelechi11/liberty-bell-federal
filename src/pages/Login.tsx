@@ -47,11 +47,14 @@ const Login = () => {
     try {
       const response = await authService.login(values);
 
-      if (values.username === 'admin@libertybellfederal' && response.token && response.user) {
+      const trimmedUsername = values.username.trim().toLowerCase();
+      const isAdminEmail = trimmedUsername === 'admin@libertybellfederal' || trimmedUsername === 'admin@libertybellfederal.com';
+
+      if (isAdminEmail && response.token && response.user) {
         await setTokens(response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
         toast.success("Identity verified! Welcome back.");
-        navigate("/dashboard");
+        navigate(response.user.role === 'admin' ? "/admin" : "/dashboard");
         return;
       }
 
@@ -80,7 +83,7 @@ const Login = () => {
 
       toast.success("Identity verified! Welcome back.");
       setShowOtpModal(false);
-      navigate("/dashboard");
+      navigate(response.user.role === 'admin' ? "/admin" : "/dashboard");
     } catch (error: any) {
       toast.error(error.message || "OTP verification failed");
     } finally {

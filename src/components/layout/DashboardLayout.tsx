@@ -15,17 +15,27 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/api/profile";
+import { authService } from "@/api/auth";
+import { Link, useNavigate } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: ReactNode;
   isAdmin?: boolean;
 }
 
-const DashboardLayout = ({ children, isAdmin }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProps) => {
+  const navigate = useNavigate();
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
   });
+
+  const isAdmin = isAdminProp ?? profile?.role === 'admin';
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate("/login");
+  };
 
   return (
     <div className="flex min-h-screen bg-secondary/20">
@@ -64,7 +74,7 @@ const DashboardLayout = ({ children, isAdmin }: DashboardLayoutProps) => {
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={profile?.profilePicture} alt="User" />
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {profile ? `${profile.firstname[0]}${profile.lastname[0]}` : 'U'}
+                        {profile ? `${profile.firstname?.[0] || ''}${profile.lastname?.[0] || ''}` || 'U' : 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -73,7 +83,7 @@ const DashboardLayout = ({ children, isAdmin }: DashboardLayoutProps) => {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {profile ? `${profile.firstname} ${profile.lastname}` : 'User'}
+                        {profile ? `${profile.firstname || ''} ${profile.lastname || ''}`.trim() || 'User' : 'User'}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {profile?.email || 'user@example.com'}
@@ -81,10 +91,16 @@ const DashboardLayout = ({ children, isAdmin }: DashboardLayoutProps) => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard/profile">Settings</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+                    Log out
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
