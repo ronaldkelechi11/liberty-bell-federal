@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Overview from "./pages/dashboard/Overview";
 import Accounts from "./pages/dashboard/Accounts";
 import AccountDetail from "./pages/dashboard/AccountDetail";
+import Transactions from "./pages/dashboard/Transactions";
 import Transfers from "./pages/dashboard/Transfers";
 import Cards from "./pages/dashboard/Cards";
 import Investments from "./pages/dashboard/Investments";
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/dashboard" element={<Overview />} />
           <Route path="/dashboard/accounts" element={<Accounts />} />
           <Route path="/dashboard/accounts/:id" element={<AccountDetail />} />
+          <Route path="/dashboard/transactions" element={<Transactions />} />
           <Route path="/dashboard/transfers" element={<Transfers />} />
           <Route path="/dashboard/cards" element={<Cards />} />
           <Route path="/dashboard/investments" element={<Investments />} />

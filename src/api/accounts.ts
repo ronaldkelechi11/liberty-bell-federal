@@ -12,4 +12,5 @@ export const accountService = {
   closeAccount: (id: string) => api.patch<{ message: string }>(`/accounts/${id}/close`),
   getStatement: (id: string, month: number, year: number) =>
     api.get<Transaction[]>(`/accounts/${id}/statement?month=${month}&year=${year}`),
+  getAllTransactions: () => api.get<Transaction[]>('/accounts/transactions/my'),
 };

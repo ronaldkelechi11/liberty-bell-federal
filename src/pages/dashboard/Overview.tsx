@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import {
   ArrowUpRight,
   ArrowDownLeft,
   Wallet,
   CreditCard,
-  TrendingUp,
+  Target,
   ChevronRight,
   MoreHorizontal
 } from "lucide-react";
@@ -16,8 +17,16 @@ import { accountService } from "@/api/accounts";
 import { profileService } from "@/api/profile";
 import { cardService } from "@/api/cards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
+import NewAccountModal from "@/components/dashboard/NewAccountModal";
+import TransactionReceiptModal from "@/components/dashboard/TransactionReceiptModal";
+import { Transaction } from "@/api/types";
+import { format } from "date-fns";
 
 const Overview = () => {
+  const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
@@ -34,9 +43,34 @@ const Overview = () => {
     queryFn: () => cardService.getCards(),
   });
 
-  const transactions: any[] = [];
+  const { data: transactions = [] } = useQuery({
+    queryKey: ['transactions'],
+    queryFn: () => accountService.getAllTransactions(),
+    retry: false,
+  });
 
   const totalBalance = accounts.reduce((acc, curr) => acc + curr.balance, 0);
+
+  const totalDailyLimit = accounts.reduce((acc, curr) => acc + (curr.dailyLimit || 0), 0);
+
+  const spentToday = transactions
+    .filter(t => {
+      const today = new Date();
+      const tDate = new Date(t.createdAt);
+      return t.type === 'debit' &&
+             tDate.getDate() === today.getDate() &&
+             tDate.getMonth() === today.getMonth() &&
+             tDate.getFullYear() === today.getFullYear();
+    })
+    .reduce((acc, curr) => acc + Math.abs(curr.amount), 0);
+
+  const remainingLimit = Math.max(0, totalDailyLimit - spentToday);
+  const limitUsagePercent = totalDailyLimit > 0 ? (spentToday / totalDailyLimit) * 100 : 0;
+
+  const handleTransactionClick = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsReceiptModalOpen(true);
+  };
 
   return (
     <DashboardLayout>
@@ -73,16 +107,22 @@ const Overview = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Savings</CardTitle>
-              <TrendingUp className="w-4 h-4 text-green-500" />
+              <CardTitle className="text-sm font-medium">Daily Transaction Limit</CardTitle>
+              <Target className="w-4 h-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${accounts.filter(a => a.type === 'savings').reduce((acc, curr) => acc + curr.balance, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${remainingLimit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">From savings accounts</p>
-              <div className="mt-4 w-full bg-secondary h-2 rounded-full overflow-hidden">
-                <div className="bg-primary h-full w-[0%]" />
+              <p className="text-xs text-muted-foreground mt-1">Remaining from ${totalDailyLimit.toLocaleString()} limit</p>
+              <div className="mt-4">
+                <Slider
+                  value={[limitUsagePercent]}
+                  max={100}
+                  step={1}
+                  className="pointer-events-none"
+                  disabled
+                />
               </div>
             </CardContent>
           </Card>
@@ -110,7 +150,7 @@ const Overview = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-heading font-bold">Recent Transactions</h2>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/dashboard/accounts">View All <ChevronRight className="ml-1 w-4 h-4" /></Link>
+                <Link to="/dashboard/transactions">View All <ChevronRight className="ml-1 w-4 h-4" /></Link>
               </Button>
             </div>
 
@@ -118,22 +158,26 @@ const Overview = () => {
               <CardContent className={transactions.length > 0 ? "p-0" : "p-6"}>
                 {transactions.length > 0 ? (
                   <div className="divide-y divide-border">
-                    {transactions.map((t) => (
-                      <div key={t.id} className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors">
+                    {transactions.slice(0, 5).map((t) => (
+                      <div
+                        key={t.id}
+                        className="flex items-center justify-between p-4 hover:bg-secondary/30 transition-colors cursor-pointer"
+                        onClick={() => handleTransactionClick(t)}
+                      >
                         <div className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            t.amount < 0 ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
+                            t.type === 'debit' ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
                           }`}>
-                            {t.amount < 0 ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+                            {t.type === 'debit' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
                           </div>
                           <div>
-                            <p className="font-medium">{t.title}</p>
-                            <p className="text-xs text-muted-foreground">{t.date} • {t.category}</p>
+                            <p className="font-medium">{t.description}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(t.createdAt), 'MMM dd, yyyy')} • {t.category}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`font-bold ${t.amount < 0 ? "text-foreground" : "text-green-600"}`}>
-                            {t.amount < 0 ? "-" : "+"}${Math.abs(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          <p className={`font-bold ${t.type === 'debit' ? "text-foreground" : "text-green-600"}`}>
+                            {t.type === 'debit' ? "-" : "+"}${Math.abs(t.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </p>
                           <p className="text-[10px] text-muted-foreground uppercase">{t.status}</p>
                         </div>
@@ -177,7 +221,11 @@ const Overview = () => {
                   </CardContent>
                 </Card>
               ))}
-              <Button variant="outline" className="w-full border-dashed rounded-2xl py-8 h-auto flex-col gap-2">
+              <Button
+                variant="outline"
+                className="w-full border-dashed rounded-2xl py-8 h-auto flex-col gap-2"
+                onClick={() => setIsNewAccountModalOpen(true)}
+              >
                 <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
                   <span className="text-xl font-light">+</span>
                 </div>
@@ -187,6 +235,17 @@ const Overview = () => {
           </div>
         </div>
       </div>
+
+      <NewAccountModal
+        isOpen={isNewAccountModalOpen}
+        onOpenChange={setIsNewAccountModalOpen}
+      />
+
+      <TransactionReceiptModal
+        transaction={selectedTransaction}
+        isOpen={isReceiptModalOpen}
+        onOpenChange={setIsReceiptModalOpen}
+      />
     </DashboardLayout>
   );
 };
