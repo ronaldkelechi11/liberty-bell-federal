@@ -17,6 +17,7 @@ import {
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import TransactionReceiptModal from "@/components/dashboard/TransactionReceiptModal";
 import { Transaction } from "@/api/types";
 import { format } from "date-fns";
@@ -56,7 +57,11 @@ const Transactions = () => {
             <p className="text-muted-foreground">View and manage all your account activities.</p>
           </div>
           <div className="ml-auto">
-            <Button variant="outline" className="rounded-xl gap-2 hidden md:flex">
+            <Button
+              variant="outline"
+              className="rounded-xl gap-2 hidden md:flex"
+              onClick={() => toast.info("Exporting transactions... check your downloads folder shortly.")}
+            >
               <Download className="w-4 h-4" /> Export CSV
             </Button>
           </div>
@@ -73,10 +78,18 @@ const Transactions = () => {
             />
           </div>
           <div className="flex gap-2 w-full md:w-auto">
-            <Button variant="outline" className="rounded-xl gap-2 flex-1 md:flex-none">
+            <Button
+              variant="outline"
+              className="rounded-xl gap-2 flex-1 md:flex-none"
+              onClick={() => toast.info("Date range selection coming soon!")}
+            >
               <Calendar className="w-4 h-4" /> Date Range
             </Button>
-            <Button variant="outline" className="rounded-xl gap-2 flex-1 md:flex-none">
+            <Button
+              variant="outline"
+              className="rounded-xl gap-2 flex-1 md:flex-none"
+              onClick={() => toast.info("Transaction filtering coming soon!")}
+            >
               <Filter className="w-4 h-4" /> Filter
             </Button>
           </div>

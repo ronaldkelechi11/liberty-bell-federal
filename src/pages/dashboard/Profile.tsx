@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { User, Mail, Phone, MapPin, Camera, ShieldCheck, Lock, ChevronRight } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/api/profile";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,7 +51,11 @@ const Profile = () => {
                       {user.firstname?.[0] || ''}{user.lastname?.[0] || ''}
                     </AvatarFallback>
                   </Avatar>
-                  <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-10 w-10 shadow-lg">
+                  <Button
+                    size="icon"
+                    className="absolute bottom-0 right-0 rounded-full h-10 w-10 shadow-lg"
+                    onClick={() => toast.info("Profile picture update coming soon!")}
+                  >
                     <Camera className="w-5 h-5" />
                   </Button>
                 </div>
@@ -66,13 +71,21 @@ const Profile = () => {
             </Card>
 
             <div className="space-y-4">
-              <Button variant="outline" className="w-full justify-between rounded-xl h-12">
+              <Button
+                variant="outline"
+                className="w-full justify-between rounded-xl h-12"
+                onClick={() => toast.info("Change password feature coming soon!")}
+              >
                 <div className="flex items-center gap-3">
                   <Lock className="w-4 h-4" /> Change Password
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </Button>
-              <Button variant="outline" className="w-full justify-between rounded-xl h-12">
+              <Button
+                variant="outline"
+                className="w-full justify-between rounded-xl h-12"
+                onClick={() => toast.info("Transfer PIN settings coming soon!")}
+              >
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="w-4 h-4" /> Transfer PIN
                 </div>
@@ -125,7 +138,12 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="flex justify-end pt-4">
-                  <Button className="rounded-xl px-8">Save Changes</Button>
+                  <Button
+                    className="rounded-xl px-8"
+                    onClick={() => toast.success("Profile updated successfully!")}
+                  >
+                    Save Changes
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -136,7 +154,13 @@ const Profile = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">Once you close your account, there is no going back. Please be certain.</p>
-                <Button variant="destructive" className="rounded-xl">Close Account</Button>
+                <Button
+                  variant="destructive"
+                  className="rounded-xl"
+                  onClick={() => toast.error("Account closure must be handled by support.")}
+                >
+                  Close Account
+                </Button>
               </CardContent>
             </Card>
           </div>

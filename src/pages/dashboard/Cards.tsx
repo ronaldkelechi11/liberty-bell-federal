@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Plus, MoreHorizontal, ShieldCheck, Zap, Lock } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { cardService } from "@/api/cards";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +22,10 @@ const Cards = () => {
             <h1 className="text-2xl font-heading font-bold">Your Cards</h1>
             <p className="text-muted-foreground">Manage your physical and virtual payment cards.</p>
           </div>
-          <Button className="rounded-xl gap-2">
+          <Button
+            className="rounded-xl gap-2"
+            onClick={() => toast.info("Card request feature coming soon!")}
+          >
             <Plus className="w-4 h-4" /> Request New Card
           </Button>
         </div>
@@ -70,10 +74,20 @@ const Cards = () => {
                   </Card>
 
                   <div className="mt-4 flex gap-3">
-                    <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl flex-1 gap-2"
+                      onClick={() => toast.info("Card management coming soon!")}
+                    >
                       <ShieldCheck className="w-4 h-4" /> Manage
                     </Button>
-                    <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl flex-1 gap-2"
+                      onClick={() => toast.info(`Card ${card.status === 'active' ? 'freezing' : 'unfreezing'} coming soon!`)}
+                    >
                       <Lock className="w-4 h-4" /> {card.status === 'active' ? 'Freeze' : 'Unfreeze'}
                     </Button>
                     <Button variant="outline" size="icon" className="rounded-xl">
@@ -104,7 +118,14 @@ const Cards = () => {
                         <p className="text-xs text-muted-foreground">Enabled for all cards</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-primary font-bold">Edit</Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary font-bold"
+                      onClick={() => toast.info("Security settings coming soon!")}
+                    >
+                      Edit
+                    </Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-background rounded-xl">
                     <div className="flex items-center gap-3">
@@ -116,7 +137,14 @@ const Cards = () => {
                         <p className="text-xs text-muted-foreground">Limit: $1,000 / day</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-primary font-bold">Edit</Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary font-bold"
+                      onClick={() => toast.info("Security settings coming soon!")}
+                    >
+                      Edit
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -130,7 +158,13 @@ const Cards = () => {
                   </div>
                   <h4 className="font-bold">Virtual Cards</h4>
                   <p className="text-xs text-muted-foreground mt-2">Create disposable virtual cards for secure online shopping.</p>
-                  <Button variant="link" className="p-0 text-primary mt-2 h-auto">Create Virtual Card</Button>
+                  <Button
+                    variant="link"
+                    className="p-0 text-primary mt-2 h-auto"
+                    onClick={() => toast.info("Virtual cards coming soon!")}
+                  >
+                    Create Virtual Card
+                  </Button>
                 </CardContent>
               </Card>
               <Card className="border-none shadow-sm bg-indigo-50">
@@ -140,7 +174,13 @@ const Cards = () => {
                   </div>
                   <h4 className="font-bold">PIN Management</h4>
                   <p className="text-xs text-muted-foreground mt-2">Change your card PIN anytime through our secure portal.</p>
-                  <Button variant="link" className="p-0 text-indigo-600 mt-2 h-auto">Update PIN</Button>
+                  <Button
+                    variant="link"
+                    className="p-0 text-indigo-600 mt-2 h-auto"
+                    onClick={() => toast.info("PIN management coming soon!")}
+                  >
+                    Update PIN
+                  </Button>
                 </CardContent>
               </Card>
             </div>

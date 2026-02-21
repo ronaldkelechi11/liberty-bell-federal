@@ -58,11 +58,19 @@ const OtpModal = ({ isOpen, onClose, onVerify, emailOrPhone, loading = false }: 
               <InputOTPSlot index={5} className="w-12 h-12 text-lg border-2 rounded-md" />
             </InputOTPGroup>
           </InputOTP>
-          <div className="mt-8 w-full space-y-4">
-            <Button className="w-full btn-glow" onClick={handleVerify} loading={loading}>
+          <div className="mt-8 w-full space-y-3">
+            <Button className="w-full btn-glow h-12 text-base" onClick={handleVerify} loading={loading}>
               Verify & Login
             </Button>
-            <div className="text-center">
+            <Button
+              variant="ghost"
+              className="w-full text-muted-foreground hover:text-foreground"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <div className="text-center pt-2">
               <button
                 className="text-sm text-primary hover:underline font-medium"
                 onClick={() => toast.success("OTP has been resent!")}

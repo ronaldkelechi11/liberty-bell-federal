@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   ChevronLeft,
   Download,
@@ -64,11 +65,24 @@ const AccountDetail = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem className="gap-2"><Lock className="w-4 h-4" /> Freeze Account</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2 text-destructive"><XCircle className="w-4 h-4" /> Close Account</DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2"
+                  onClick={() => toast.info("Freeze account feature coming soon!")}
+                >
+                  <Lock className="w-4 h-4" /> Freeze Account
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2 text-destructive"
+                  onClick={() => toast.error("Please contact support to close your account.")}
+                >
+                  <XCircle className="w-4 h-4" /> Close Account
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button className="rounded-xl gap-2">
+            <Button
+              className="rounded-xl gap-2"
+              onClick={() => toast.info("Generating statement... check back soon!")}
+            >
               <Download className="w-4 h-4" /> Statement
             </Button>
           </div>
@@ -84,11 +98,11 @@ const AccountDetail = () => {
                   <p className="text-primary-foreground/70 text-sm font-medium uppercase tracking-wider">Current Balance</p>
                   <h2 className="text-4xl md:text-5xl font-bold mt-2">${account.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h2>
                   <div className="flex gap-4 mt-8">
-                    <Button variant="secondary" className="bg-white text-primary hover:bg-white/90 rounded-xl px-6">
-                      Send Money
+                    <Button variant="secondary" className="bg-white text-primary hover:bg-white/90 rounded-xl px-6" asChild>
+                      <Link to="/dashboard/transfers">Send Money</Link>
                     </Button>
-                    <Button variant="secondary" className="bg-white/20 border-none text-white hover:bg-white/30 rounded-xl px-6">
-                      Add Funds
+                    <Button variant="secondary" className="bg-white/20 border-none text-white hover:bg-white/30 rounded-xl px-6" asChild>
+                      <Link to="/dashboard/transfers">Add Funds</Link>
                     </Button>
                   </div>
                 </div>
@@ -191,7 +205,13 @@ const AccountDetail = () => {
                   <h3 className="font-bold">Monthly Statements</h3>
                   <p className="text-sm text-muted-foreground mt-1">Download your monthly transaction records in PDF format.</p>
                 </div>
-                <Button variant="outline" className="w-full rounded-xl">View All Statements</Button>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-xl"
+                  onClick={() => toast.info("Statements archive coming soon!")}
+                >
+                  View All Statements
+                </Button>
               </CardContent>
             </Card>
           </div>

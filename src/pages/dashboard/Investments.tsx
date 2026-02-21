@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, Plus, ArrowUpRight, Clock, ShieldCheck, ChevronRight } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { investmentService } from "@/api/investments";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,7 +31,10 @@ const Investments = () => {
             <h1 className="text-2xl font-heading font-bold">Investments</h1>
             <p className="text-muted-foreground">Grow your wealth with our tailored investment plans.</p>
           </div>
-          <Button className="rounded-xl gap-2 bg-green-600 hover:bg-green-700">
+          <Button
+            className="rounded-xl gap-2 bg-green-600 hover:bg-green-700"
+            onClick={() => toast.info("New investment plans coming soon!")}
+          >
             <Plus className="w-4 h-4" /> New Investment
           </Button>
         </div>
@@ -91,7 +95,12 @@ const Investments = () => {
                   </div>
                   <div className="pt-4 border-t border-border mt-auto">
                     <p className="text-sm text-muted-foreground mb-4">Minimum Investment: <span className="font-bold text-foreground">${plan.min}</span></p>
-                    <Button className="w-full rounded-xl">Invest Now</Button>
+                    <Button
+                      className="w-full rounded-xl"
+                      onClick={() => toast.info(`${plan.name} investment feature coming soon!`)}
+                    >
+                      Invest Now
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -154,7 +163,13 @@ const Investments = () => {
                   <h3 className="font-bold">No active investments</h3>
                   <p className="text-sm text-muted-foreground mt-1">Start growing your money by choosing an investment plan.</p>
                 </div>
-                <Button variant="outline" className="rounded-xl">Browse Plans</Button>
+                <Button
+                  variant="outline"
+                  className="rounded-xl"
+                  onClick={() => toast.info("Investment plans gallery coming soon!")}
+                >
+                  Browse Plans
+                </Button>
               </CardContent>
             </Card>
           )}

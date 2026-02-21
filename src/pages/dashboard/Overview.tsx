@@ -11,7 +11,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
 import { profileService } from "@/api/profile";
@@ -27,6 +27,7 @@ const Overview = () => {
   const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const navigate = useNavigate();
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
@@ -100,11 +101,15 @@ const Overview = () => {
               </div>
               <p className="text-xs mt-1 opacity-70">+2.5% from last month</p>
               <div className="flex gap-2 mt-6">
-                <Button size="sm" variant="secondary" className="bg-white text-primary hover:bg-white/90">
-                  <ArrowUpRight className="w-4 h-4 mr-1" /> Send
+                <Button size="sm" variant="secondary" className="bg-white text-primary hover:bg-white/90" asChild>
+                  <Link to="/dashboard/transfers">
+                    <ArrowUpRight className="w-4 h-4 mr-1" /> Send
+                  </Link>
                 </Button>
-                <Button size="sm" variant="secondary" className="bg-white/20 border-none text-white hover:bg-white/30">
-                  <ArrowDownLeft className="w-4 h-4 mr-1" /> Add Money
+                <Button size="sm" variant="secondary" className="bg-white/20 border-none text-white hover:bg-white/30" asChild>
+                  <Link to="/dashboard/transfers">
+                    <ArrowDownLeft className="w-4 h-4 mr-1" /> Add Money
+                  </Link>
                 </Button>
               </div>
             </CardContent>
@@ -211,7 +216,11 @@ const Overview = () => {
 
             <div className="space-y-4">
               {Array.isArray(accounts) && accounts.map((acc) => (
-                <Card key={acc.id} className="hover:border-primary/50 transition-colors cursor-pointer group">
+                <Card
+                  key={acc.id}
+                  className="hover:border-primary/50 transition-colors cursor-pointer group"
+                  onClick={() => navigate(`/dashboard/accounts/${acc.id}`)}
+                >
                   <CardContent className="p-4 flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                       <Wallet className="w-6 h-6" />

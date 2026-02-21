@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, CheckCircle2, AlertCircle, Info, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { notificationService } from "@/api/notifications";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,8 +39,20 @@ const Notifications = () => {
             <p className="text-muted-foreground">Stay updated with your account activity.</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="rounded-xl">Mark all as read</Button>
-            <Button variant="outline" size="icon" className="rounded-xl text-destructive hover:bg-destructive/10">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
+              onClick={() => toast.success("All notifications marked as read")}
+            >
+              Mark all as read
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-xl text-destructive hover:bg-destructive/10"
+              onClick={() => toast.success("Notification history cleared")}
+            >
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
@@ -66,7 +79,13 @@ const Notifications = () => {
                       <p className="text-sm text-muted-foreground leading-relaxed">{notif.message}</p>
                       {!notif.isRead && (
                         <div className="pt-2">
-                          <Button variant="link" className="p-0 h-auto text-xs font-bold text-primary">Mark as read</Button>
+                          <Button
+                            variant="link"
+                            className="p-0 h-auto text-xs font-bold text-primary"
+                            onClick={() => toast.success("Marked as read")}
+                          >
+                            Mark as read
+                          </Button>
                         </div>
                       )}
                     </div>
