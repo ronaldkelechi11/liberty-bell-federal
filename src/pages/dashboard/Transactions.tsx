@@ -31,6 +31,7 @@ const Transactions = () => {
     queryFn: () => accountService.getAllTransactions(),
     // Fallback to empty array if endpoint doesn't exist yet
     retry: false,
+    throwOnError: false,
   });
 
   const filteredTransactions = transactions.filter(t =>

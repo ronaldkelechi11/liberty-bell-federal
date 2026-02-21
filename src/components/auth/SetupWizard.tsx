@@ -71,7 +71,7 @@ const SetupWizard = () => {
     if (!file) {
       toast.error("Please select a picture first");
       return;
-    }
+    }    
 
     setIsLoading(true);
     try {

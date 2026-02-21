@@ -28,6 +28,7 @@ const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProp
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
+    throwOnError: false,
   });
 
   const isAdmin = isAdminProp ?? profile?.role === 'admin';
@@ -74,7 +75,9 @@ const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProp
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={profile?.profilePicture} alt="User" />
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {profile ? `${profile.firstname?.[0] || ''}${profile.lastname?.[0] || ''}` || 'U' : 'U'}
+                        {profile?.firstname || profile?.lastname
+                          ? `${profile?.firstname?.[0] ?? ''}${profile?.lastname?.[0] ?? ''}`
+                          : 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>

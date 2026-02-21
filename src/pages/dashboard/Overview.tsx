@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   ArrowDownLeft,
@@ -30,23 +30,32 @@ const Overview = () => {
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
+    throwOnError: false,
   });
 
+  useEffect(() => {
+    console.log(profile);
+    
+  }, [profile]);
+  
   const { data: accounts = [], isLoading: accountsLoading } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => accountService.getMyAccounts(),
     retry: false,
+    throwOnError: false,
   });
 
   const { data: cards = [] } = useQuery({
     queryKey: ['cards'],
     queryFn: () => cardService.getCards(),
+    throwOnError: false,
   });
 
   const { data: transactions = [] } = useQuery({
     queryKey: ['transactions'],
     queryFn: () => accountService.getAllTransactions(),
     retry: false,
+    throwOnError: false,
   });
 
   const totalBalance = Array.isArray(accounts) ? accounts.reduce((acc, curr) => acc + (curr.balance || 0), 0) : 0;
