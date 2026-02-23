@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import OtpModal from "@/components/auth/OtpModal";
+import ResendVerificationModal from "@/components/auth/ResendVerificationModal";
 import { authService } from "@/api/auth";
 import { setTokens } from "@/api/client";
 
@@ -28,6 +29,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [showResendModal, setShowResendModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -214,9 +216,12 @@ const Login = () => {
 
           <p className="text-center mt-8 text-sm text-muted-foreground">
             Haven't verified your account?{" "}
-            <Link to="/register" className="text-primary font-bold hover:underline">
+            <button
+              onClick={() => setShowResendModal(true)}
+              className="text-primary font-bold hover:underline"
+            >
               Verify Email
-            </Link>
+            </button>
           </p>
 
           <p className="text-center mt-8 text-sm text-muted-foreground">
@@ -235,6 +240,12 @@ const Login = () => {
         onVerify={handleOtpVerify}
         emailOrPhone={loginData?.username || "your registered device"}
         loading={isOtpLoading}
+      />
+
+      {/* RESEND VERIFICATION MODAL */}
+      <ResendVerificationModal
+        isOpen={showResendModal}
+        onClose={() => setShowResendModal(false)}
       />
     </div>
   );
