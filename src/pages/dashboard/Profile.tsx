@@ -8,11 +8,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/api/profile";
 import { Skeleton } from "@/components/ui/skeleton";
+import UploadProfilePictureModal from "@/components/dashboard/UploadProfilePictureModal";
+import { useState } from "react";
 
 const Profile = () => {
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const { data: user, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
+    throwOnError: false,
   });
 
   if (isLoading) {
@@ -29,7 +33,11 @@ const Profile = () => {
     );
   }
 
-  if (!user) return null;
+  if (!user) return (
+    <div className="">
+      <p>No user avalaible. Please Login again</p>
+    </div>
+  );
 
   return (
     <DashboardLayout>
@@ -50,7 +58,8 @@ const Profile = () => {
                       {user.firstname?.[0] || ''}{user.lastname?.[0] || ''}
                     </AvatarFallback>
                   </Avatar>
-                  <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-10 w-10 shadow-lg">
+                  {/* Camera Button */}
+                  <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-10 w-10 shadow-lg" onClick={() => setIsUploadModalOpen(true)}>
                     <Camera className="w-5 h-5" />
                   </Button>
                 </div>
@@ -142,6 +151,11 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      <UploadProfilePictureModal
+        isOpen={isUploadModalOpen}
+        onOpenChange={setIsUploadModalOpen}
+      />
     </DashboardLayout>
   );
 };
