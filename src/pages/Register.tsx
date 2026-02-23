@@ -26,7 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { authService } from "@/api/auth";
 import { AccountType } from "@/api/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -108,6 +108,25 @@ const Register = () => {
       accuracyConfirmed: false,
     },
   });
+
+  // Watch the DOB field and auto-calculate age
+  const dobValue = form.watch("dob");
+
+  useEffect(() => {
+    if (dobValue) {
+      const dob = new Date(dobValue);
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - dob.getFullYear();
+      const monthDifference = today.getMonth() - dob.getMonth();
+
+      // Adjust if birthday hasn't occurred this year
+      if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+        calculatedAge--;
+      }
+
+      form.setValue("age", calculatedAge.toString(), { shouldValidate: true });
+    }
+  }, [dobValue, form]);
 
   const onSubmit = async (values: RegisterFormValues) => {
     setIsLoading(true);
@@ -314,7 +333,7 @@ const Register = () => {
                       <FormItem>
                         <FormLabel>Age</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="25" {...field} />
+                          <Input type="number" placeholder="25" disabled {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -591,7 +610,7 @@ const Register = () => {
                 </p>
               </section>
 
-              <Button type="submit" className="w-full btn-glow" size="xl" loading={isLoading}>
+              <Button type="submit" className="w-full btn-glow py-2" size="xl" loading={isLoading}>
                 Create Account
               </Button>
             </form>

@@ -213,6 +213,13 @@ const Login = () => {
           </Form>
 
           <p className="text-center mt-8 text-sm text-muted-foreground">
+            Haven't verified your account?{" "}
+            <Link to="/register" className="text-primary font-bold hover:underline">
+              Verify Email
+            </Link>
+          </p>
+
+          <p className="text-center mt-8 text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/register" className="text-primary font-bold hover:underline">
               Create an account
