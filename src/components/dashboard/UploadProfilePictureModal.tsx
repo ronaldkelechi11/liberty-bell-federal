@@ -73,6 +73,8 @@ const UploadProfilePictureModal = ({ isOpen, onOpenChange }: UploadProfilePictur
             });
             return;
         }
+        console.log(selectedFile);
+
         uploadMutation.mutate(selectedFile);
     };
 

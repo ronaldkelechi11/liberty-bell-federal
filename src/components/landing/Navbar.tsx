@@ -37,7 +37,7 @@ const Navbar = () => {
             <span className="text-primary-foreground font-heading font-bold text-sm">LB</span>
           </div>
           <span className="font-heading text-lg font-bold text-foreground tracking-tight">
-            Liberty Bell
+            Liberty Bell Fedaral Bank
           </span>
         </Link>
 

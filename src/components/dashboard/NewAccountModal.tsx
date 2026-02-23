@@ -107,7 +107,7 @@ const NewAccountModal = ({ isOpen, onOpenChange }: NewAccountModalProps) => {
                     <SelectItem value="checking">Checking Account</SelectItem>
                     <SelectItem value="savings">Savings Account</SelectItem>
                     <SelectItem value="investment">Investment Account</SelectItem>
-                    <SelectItem value="btc">BTC Account</SelectItem>
+                    <SelectItem value="btc">Bitcoin Account</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -138,7 +138,7 @@ export interface CreateCardDto {
   cardNumber?: string;
   cardHolder?: string;
   expiryDate?: string;
-  cardType:string;
+  cardType: string;
   cvv?: string;
   userId?: string;
   otp: string;
