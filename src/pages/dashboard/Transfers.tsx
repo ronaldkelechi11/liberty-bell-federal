@@ -15,6 +15,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const Transfers = () => {
   const [amount, setAmount] = useState("");
+  const [fromAccountId, setFromAccountId] = useState("");
+  const [toAccountId, setToAccountId] = useState("");
+  const [externalFromAccountId, setExternalFromAccountId] = useState("");
+  const [walletAddress, setWalletAddress] = useState("");
+  const [transferDescription, setTransferDescription] = useState("");
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['accounts'],
@@ -51,7 +56,7 @@ const Transfers = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label>From Account</Label>
-                        <Select>
+                        <Select value={fromAccountId} onValueChange={setFromAccountId}>
                           <SelectTrigger className="rounded-xl h-12">
                             <SelectValue placeholder="Select account" />
                           </SelectTrigger>
@@ -60,7 +65,7 @@ const Transfers = () => {
                               <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
                             ) : accounts.map(acc => (
                               <SelectItem key={acc.id} value={acc.id}>
-                                <span className="capitalize">{acc.type}</span> ({acc.accountNumber}) - ${acc.balance.toLocaleString()}
+                                <span className="capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</span> ({acc.accountNumber}) - {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -68,7 +73,7 @@ const Transfers = () => {
                       </div>
                       <div className="space-y-2">
                         <Label>To Account</Label>
-                        <Select>
+                        <Select value={toAccountId} onValueChange={setToAccountId}>
                           <SelectTrigger className="rounded-xl h-12">
                             <SelectValue placeholder="Select account" />
                           </SelectTrigger>
@@ -77,7 +82,7 @@ const Transfers = () => {
                               <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
                             ) : accounts.map(acc => (
                               <SelectItem key={acc.id} value={acc.id}>
-                                <span className="capitalize">{acc.type}</span> ({acc.accountNumber}) - ${acc.balance.toLocaleString()}
+                                <span className="capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</span> ({acc.accountNumber}) - {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -88,11 +93,13 @@ const Transfers = () => {
                     <div className="space-y-2">
                       <Label>Amount</Label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-lg">$</span>
+                        <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold ${accounts.find(a => a.id === fromAccountId)?.currency === 'BTC' ? 'text-sm' : 'text-lg'}`}>
+                          {accounts.find(a => a.id === fromAccountId)?.currency === 'BTC' ? 'Bitcoin' : '$'}
+                        </span>
                         <Input
                           type="number"
                           placeholder="0.00"
-                          className="pl-8 h-12 text-lg font-bold rounded-xl"
+                          className={`${accounts.find(a => a.id === fromAccountId)?.currency === 'BTC' ? 'pl-20' : 'pl-8'} h-12 text-lg font-bold rounded-xl`}
                           value={amount}
                           onChange={(e) => setAmount(e.target.value)}
                         />
@@ -101,7 +108,13 @@ const Transfers = () => {
 
                     <div className="space-y-2">
                       <Label>Description (Optional)</Label>
-                      <Textarea placeholder="What's this for?" className="rounded-xl resize-none" rows={3} />
+                      <Textarea
+                        placeholder="What's this for?"
+                        className="rounded-xl resize-none"
+                        rows={3}
+                        value={transferDescription}
+                        onChange={(e) => setTransferDescription(e.target.value)}
+                      />
                     </div>
 
                     <Button className="w-full h-12 rounded-xl text-lg font-bold gap-2">
@@ -120,7 +133,7 @@ const Transfers = () => {
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
                       <Label>From Account</Label>
-                      <Select>
+                      <Select value={externalFromAccountId} onValueChange={setExternalFromAccountId}>
                         <SelectTrigger className="rounded-xl h-12">
                           <SelectValue placeholder="Select account" />
                         </SelectTrigger>
@@ -129,43 +142,81 @@ const Transfers = () => {
                             <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
                           ) : accounts.map(acc => (
                             <SelectItem key={acc.id} value={acc.id}>
-                              <span className="capitalize">{acc.type}</span> ({acc.accountNumber}) - ${acc.balance.toLocaleString()}
+                              <span className="capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</span> ({acc.accountNumber}) - {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label>Recipient Name</Label>
-                        <Input placeholder="Full name" className="h-12 rounded-xl" />
+                    {accounts.find(a => a.id === externalFromAccountId)?.type === 'btc' ? (
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Wallet Address</Label>
+                          <Input
+                            placeholder="Enter Bitcoin wallet address (e.g. 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa)"
+                            className="h-12 rounded-xl"
+                            value={walletAddress}
+                            onChange={(e) => setWalletAddress(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Transfer Description</Label>
+                          <Textarea
+                            placeholder="Note for this Bitcoin transfer"
+                            className="rounded-xl resize-none"
+                            rows={3}
+                            value={transferDescription}
+                            onChange={(e) => setTransferDescription(e.target.value)}
+                          />
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Bank Name</Label>
-                        <Input placeholder="e.g. Chase, Wells Fargo" className="h-12 rounded-xl" />
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Recipient Name</Label>
+                          <Input placeholder="Full name" className="h-12 rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Bank Name</Label>
+                          <Input placeholder="e.g. Chase, Wells Fargo" className="h-12 rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Account Number</Label>
+                          <Input placeholder="Enter account number" className="h-12 rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Routing Number</Label>
+                          <Input placeholder="Enter routing number" className="h-12 rounded-xl" />
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Account Number</Label>
-                        <Input placeholder="Enter account number" className="h-12 rounded-xl" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Routing Number</Label>
-                        <Input placeholder="Enter routing number" className="h-12 rounded-xl" />
-                      </div>
-                    </div>
+                    )}
 
                     <div className="space-y-2">
                       <Label>Amount</Label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-lg">$</span>
-                        <Input type="number" placeholder="0.00" className="pl-8 h-12 text-lg font-bold rounded-xl" />
+                        <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold ${accounts.find(a => a.id === externalFromAccountId)?.currency === 'BTC' ? 'text-sm' : 'text-lg'}`}>
+                          {accounts.find(a => a.id === externalFromAccountId)?.currency === 'BTC' ? 'Bitcoin' : '$'}
+                        </span>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          className={`${accounts.find(a => a.id === externalFromAccountId)?.currency === 'BTC' ? 'pl-20' : 'pl-8'} h-12 text-lg font-bold rounded-xl`}
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label>Description</Label>
-                      <Textarea placeholder="Note for recipient" className="rounded-xl resize-none" rows={3} />
+                      <Textarea
+                        placeholder="Note for recipient"
+                        className="rounded-xl resize-none"
+                        rows={3}
+                        value={transferDescription}
+                        onChange={(e) => setTransferDescription(e.target.value)}
+                      />
                     </div>
 
                     <Button className="w-full h-12 rounded-xl text-lg font-bold gap-2">

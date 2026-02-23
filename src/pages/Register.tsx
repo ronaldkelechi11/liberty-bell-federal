@@ -47,7 +47,7 @@ const registerSchema = z.object({
   state: z.string().min(1, "Please select a state"),
   zipCode: z.string().min(5, "Valid ZIP code is required"),
   country: z.string().default("United States"),
-  accountType: z.enum(["Checking", "Savings", "Current / Premium", "Investment", "BTC"], {
+  accountType: z.enum(["Checking", "Savings", "Current / Premium", "Investment", "Bitcoin"], {
     required_error: "Please select an account type",
   }),
   securityQuestion: z.string().min(1, "Please select a security question"),
@@ -144,7 +144,11 @@ const Register = () => {
         state: values.state,
         zipCode: values.zipCode,
         country: values.country,
-        accountType: (values.accountType === "Current / Premium" ? "current" : values.accountType.toLowerCase()) as AccountType,
+        accountType: (
+          values.accountType === "Current / Premium" ? "current" :
+          values.accountType === "Bitcoin" ? "btc" :
+          values.accountType.toLowerCase()
+        ) as AccountType,
         securityQuestion: values.securityQuestion,
         securityAnswer: values.securityAnswer,
         username: values.username,
@@ -472,7 +476,7 @@ const Register = () => {
                           defaultValue={field.value}
                           className="grid grid-cols-1 md:grid-cols-3 gap-4"
                         >
-                          {["Checking", "Savings", "Current / Premium"].map((type) => (
+                          {["Checking", "Savings", "Current / Premium", "Investment", "Bitcoin"].map((type) => (
                             <FormItem key={type}>
                               <FormControl>
                                 <RadioGroupItem value={type} className="sr-only" />
@@ -486,6 +490,8 @@ const Register = () => {
                                   {type === "Checking" && "Perfect for daily expenses"}
                                   {type === "Savings" && "Grow your wealth with interest"}
                                   {type === "Current / Premium" && "Exclusive benefits & higher limits"}
+                                  {type === "Investment" && "Grow your wealth with expert plans"}
+                                  {type === "Bitcoin" && "Invest in digital currency"}
                                 </span>
                               </FormLabel>
                             </FormItem>

@@ -1,11 +1,41 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Plus, ArrowUpRight, Clock, ShieldCheck, ChevronRight } from "lucide-react";
+import { TrendingUp, Plus, ArrowUpRight, Clock, ShieldCheck, ChevronRight, BarChart3, PieChart } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { investmentService } from "@/api/investments";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell
+} from 'recharts';
+
+const cryptoData = [
+  { name: 'Mon', Bitcoin: 62000, Ethereum: 2400 },
+  { name: 'Tue', Bitcoin: 63500, Ethereum: 2550 },
+  { name: 'Wed', Bitcoin: 61000, Ethereum: 2300 },
+  { name: 'Thu', Bitcoin: 64000, Ethereum: 2600 },
+  { name: 'Fri', Bitcoin: 67000, Ethereum: 2800 },
+  { name: 'Sat', Bitcoin: 66500, Ethereum: 2750 },
+  { name: 'Sun', Bitcoin: 68000, Ethereum: 2900 },
+];
+
+const stockData = [
+  { name: 'AAPL', value: 185.92, change: +1.2 },
+  { name: 'MSFT', value: 420.55, change: -0.5 },
+  { name: 'GOOGL', value: 150.32, change: +2.1 },
+  { name: 'TSLA', value: 175.40, change: +3.5 },
+  { name: 'NVDA', value: 875.20, change: +4.8 },
+];
 
 const Investments = () => {
   const plans = [
@@ -33,6 +63,84 @@ const Investments = () => {
           <Button className="rounded-xl gap-2 bg-green-600 hover:bg-green-700">
             <Plus className="w-4 h-4" /> New Investment
           </Button>
+        </div>
+
+        {/* Market Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 overflow-hidden border-none shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-8">
+              <div>
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-primary" /> Crypto Market Analysis
+                </CardTitle>
+                <CardDescription>Live tracking of Bitcoin and Ethereum performance</CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Badge variant="outline" className="text-primary border-primary/20">Bitcoin</Badge>
+                <Badge variant="outline" className="opacity-50">Ethereum</Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={cryptoData}>
+                    <defs>
+                      <linearGradient id="colorBtc" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(val) => `$${val/1000}k`} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      formatter={(value: any) => [`$${value.toLocaleString()}`, 'Price']}
+                    />
+                    <Area type="monotone" dataKey="Bitcoin" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorBtc)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm overflow-hidden flex flex-col">
+            <CardHeader className="pb-8">
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" /> Top Stocks
+              </CardTitle>
+              <CardDescription>Performance of major tech stocks today</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1">
+              <div className="h-[200px] w-full mb-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stockData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                    <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                    <Bar dataKey="change" radius={[4, 4, 0, 0]}>
+                      {stockData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.change >= 0 ? '#10b981' : '#ef4444'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-4">
+                {stockData.slice(0, 3).map((stock) => (
+                  <div key={stock.name} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30">
+                    <span className="font-bold text-sm">{stock.name}</span>
+                    <div className="text-right">
+                      <p className="text-sm font-bold">${stock.value}</p>
+                      <p className={`text-[10px] font-bold ${stock.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {stock.change >= 0 ? '+' : ''}{stock.change}%
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
