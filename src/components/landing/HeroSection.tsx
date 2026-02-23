@@ -1,6 +1,7 @@
 import { Shield, Smartphone, Eye, Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 
 const highlights = [
@@ -11,95 +12,157 @@ const highlights = [
 ];
 
 const HeroSection = () => (
-  <section className="relative min-h-screen pt-20 flex items-center overflow-hidden bg-background">
-    {/* Decorative background elements */}
-    <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl" />
-    <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[400px] h-[400px] bg-primary/10 rounded-full blur-3xl" />
+  <section className="relative min-h-screen pt-20 flex items-center overflow-hidden">
+    {/* Background Image with Overlay */}
+    <div
+      className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: 'url("https://images.unsplash.com/photo-1550565118-3d1428df7305?q=80&w=2070&auto=format&fit=crop")',
+      }}
+    >
+      <div className="absolute inset-0 bg-background/80 md:bg-background/60 backdrop-blur-[2px]" />
+    </div>
 
-    <div className="container-bank px-4 md:px-8 relative z-10">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div className="animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-6">
-            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-            NEW: Premium Savings Account at 4.50% APY
-          </div>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold text-foreground leading-[1.1] mb-6">
-            The Future of <br />
-            <span className="text-primary italic">Personal Banking</span>
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-xl leading-relaxed">
-            Experience a bank that works as hard as you do. Secure, intuitive, and built for your financial growth. Join over 2 million Americans who trust Liberty Bell.
-          </p>
+    <div className="container-bank px-4 md:px-8 relative z-10 py-20">
+      <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 260,
+            damping: 20,
+            delay: 0.1
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-bold mb-8 border border-primary/20"
+        >
+          <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+          NEW: Premium Savings Account at 4.50% APY
+        </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-            {highlights.map(({ icon: Icon, text }, i) => (
-              <div
-                key={text}
-                className="flex items-center gap-3 text-foreground/80"
-              >
-                <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center text-primary shadow-sm">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className="font-medium text-sm">{text}</span>
-              </div>
-            ))}
-          </div>
+        <motion.h1
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 10,
+            delay: 0.2
+          }}
+          className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold text-foreground leading-[1.1] mb-8"
+        >
+          The Future of <br />
+          <span className="text-primary italic">Personal Banking</span>
+        </motion.h1>
 
-          <div className="flex flex-wrap gap-4">
-            <Button size="xl" className="btn-glow group" asChild>
-              <Link to="/register" className="p-2">
-                Open an Account
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
-            {/* <Button
-              size="xl"
-              variant="outline"
-              className="px-8 shadow-sm"
+        <motion.p
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl leading-relaxed"
+        >
+          Experience a bank that works as hard as you do. Secure, intuitive, and built for your financial growth. Join over 2 million Americans who trust Liberty Bell.
+        </motion.p>
+
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-wrap justify-center gap-6 mb-16"
+        >
+          {highlights.map(({ icon: Icon, text }, i) => (
+            <motion.div
+              key={text}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-3 bg-card/50 backdrop-blur-md p-3 pr-6 rounded-2xl border border-border shadow-sm"
             >
-              <Link to={'/#'}
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                <Icon className="w-5 h-5" />
+              </div>
+              <span className="font-semibold text-sm">{text}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 260,
+            damping: 20,
+            delay: 0.5
+          }}
+          className="flex flex-wrap gap-4"
+        >
+          <Button size="xl" className="btn-glow group px-10 h-16 rounded-2xl text-lg" asChild>
+            <Link to="/register">
+              Open an Account
+              <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
+            </Link>
+          </Button>
+          <Button size="xl" variant="outline" className="px-10 h-16 rounded-2xl text-lg backdrop-blur-md" asChild>
+            <Link to="/#investments">
               Learn More
-            </Button> */}
-          </div>
-        </div>
-
-        <div className="relative lg:block">
-          <div className="relative z-10 animate-fade-in" style={{ animationDelay: "200ms" }}>
-            <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-[2rem] p-4 backdrop-blur-sm border border-primary/10">
-              <img
-                src="https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=2070&auto=format&fit=crop"
-                alt="Liberty Bell Digital Banking"
-                className="rounded-2xl shadow-2xl w-full h-auto object-cover aspect-[4/3]"
-              />
-            </div>
-
-            {/* Floating Card UI Elements */}
-            <div className="absolute -bottom-6 -left-6 bg-card p-4 rounded-2xl shadow-xl border border-border animate-bounce-slow max-w-[200px]">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-green-600" />
-                </div>
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Transfer Success</div>
-              </div>
-              <div className="text-lg font-bold">+$1,240.00</div>
-            </div>
-
-            <div className="absolute -top-6 -right-6 bg-card p-4 rounded-2xl shadow-xl border border-border animate-float max-w-[180px]">
-              <div className="flex items-center gap-3 mb-2">
-                <Shield className="w-4 h-4 text-primary" />
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Secure Encryption</div>
-              </div>
-              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                <div className="h-full w-3/4 bg-primary" />
-              </div>
-            </div>
-          </div>
-
-          {/* Background decoration */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/5 rounded-full blur-3xl -z-10" />
-        </div>
+            </Link>
+          </Button>
+        </motion.div>
       </div>
     </div>
+
+    {/* Decorative bouncy elements */}
+    <motion.div
+      animate={{
+        y: [0, -20, 0],
+      }}
+      transition={{
+        duration: 4,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+      className="absolute bottom-20 right-[10%] hidden lg:block"
+    >
+      <div className="bg-card p-6 rounded-[2.5rem] shadow-2xl border border-border flex items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center text-green-600">
+          <Zap className="w-6 h-6" />
+        </div>
+        <div>
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Instant Deposit</div>
+          <div className="text-xl font-bold">+$2,500.00</div>
+        </div>
+      </div>
+    </motion.div>
+
+    <motion.div
+      animate={{
+        y: [0, 20, 0],
+      }}
+      transition={{
+        duration: 5,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: 0.5
+      }}
+      className="absolute top-40 left-[5%] hidden lg:block"
+    >
+      <div className="bg-card p-6 rounded-[2.5rem] shadow-2xl border border-border flex items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-600">
+          <Shield className="w-6 h-6" />
+        </div>
+        <div>
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Bank Grade Security</div>
+          <div className="h-2 w-24 bg-secondary rounded-full overflow-hidden mt-1">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="h-full bg-primary"
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
   </section>
 );
 

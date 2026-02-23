@@ -228,10 +228,13 @@ const Overview = () => {
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-bold capitalize">{acc.type} Account</p>
+                            <p className="font-bold capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type} Account</p>
                             <p className="text-xs text-muted-foreground">{(acc as any).number || (acc as any).accountNumber}</p>
                           </div>
-                          <p className="font-bold">${(acc.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                          <p className="font-bold">
+                            {acc.currency === 'BTC' ? 'Bitcoin ' : (acc.currency === 'USD' || !acc.currency ? '$' : acc.currency + ' ')}
+                            {(acc.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </p>
                         </div>
                       </div>
                     </CardContent>

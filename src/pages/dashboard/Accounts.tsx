@@ -62,7 +62,9 @@ const Accounts = () => {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-lg capitalize">{acc.type} Account</h3>
+                      <h3 className="font-bold text-lg capitalize">
+                        {acc.type === 'btc' ? 'Bitcoin' : acc.type} Account
+                      </h3>
                       <Badge variant={acc.status === 'active' ? 'default' : 'secondary'} className="text-[10px] uppercase font-bold px-2 py-0">
                         {acc.status}
                       </Badge>
@@ -73,15 +75,17 @@ const Accounts = () => {
                   <div className="mt-8">
                     <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Available Balance</p>
                     <p className="text-3xl font-bold mt-1">
-                      {acc.currency === 'USD' || !acc.currency ? '$' : acc.currency}
+                      {acc.currency === 'BTC' ? 'Bitcoin ' : (acc.currency === 'USD' || !acc.currency ? '$' : acc.currency + ' ')}
                       {acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </p>
                   </div>
 
                   <div className="mt-8 flex gap-3">
-                    <Button variant="outline" size="sm" className="flex-1 rounded-xl" asChild>
-                      <Link to={`/dashboard/accounts/${acc.id}`}>Details</Link>
-                    </Button>
+                    {acc.type !== 'savings' && (
+                      <Button variant="outline" size="sm" className="flex-1 rounded-xl" asChild>
+                        <Link to="/dashboard/transfers">Deposit</Link>
+                      </Button>
+                    )}
                     <Button variant="default" size="sm" className="flex-1 rounded-xl" asChild>
                       <Link to="/dashboard/transfers">Transfer</Link>
                     </Button>
