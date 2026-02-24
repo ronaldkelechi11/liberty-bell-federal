@@ -4,7 +4,8 @@ import {
   Wallet,
   Send,
   CreditCard,
-  TrendingUp
+  TrendingUp,
+  ArrowDownLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +15,9 @@ const BottomNav = () => {
   const links = [
     { name: "Home", href: "/dashboard", icon: LayoutDashboard },
     { name: "Wallet", href: "/dashboard/accounts", icon: Wallet },
+    { name: "Deposit", href: "/dashboard/deposits", icon: ArrowDownLeft },
     { name: "Send", href: "/dashboard/transfers", icon: Send },
     { name: "Cards", href: "/dashboard/cards", icon: CreditCard },
-    { name: "Invest", href: "/dashboard/investments", icon: TrendingUp },
   ];
 
   const isActive = (path: string) => location.pathname === path;

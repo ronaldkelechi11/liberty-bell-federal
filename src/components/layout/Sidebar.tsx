@@ -11,7 +11,8 @@ import {
   LogOut,
   BarChart3,
   Users,
-  ShieldCheck
+  ShieldCheck,
+  ArrowDownLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
   const userLinks = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Accounts", href: "/dashboard/accounts", icon: Wallet },
+    { name: "Deposits", href: "/dashboard/deposits", icon: ArrowDownLeft },
     { name: "Transfers", href: "/dashboard/transfers", icon: Send },
     { name: "Cards", href: "/dashboard/cards", icon: CreditCard },
     { name: "Investments", href: "/dashboard/investments", icon: TrendingUp },
@@ -55,7 +57,7 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-white font-heading font-bold">LB</span>
           </div>
-          <span className="font-heading text-xl font-bold text-foreground">Liberty Bell</span>
+          <span className="font-heading text-xl font-bold text-foreground">Liberty Bell Federal Bank</span>
         </Link>
       </div>
 

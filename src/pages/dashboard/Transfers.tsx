@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Building2, User2, ArrowRightCircle, Info } from "lucide-react";
+import { Send, Building2, User2, ArrowRightCircle, Info, Check } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +24,72 @@ const Transfers = () => {
     queryKey: ['accounts'],
     queryFn: () => accountService.getMyAccounts(),
   });
+
+  const getAccountDisplayText = (accountId: string) => {
+    const account = accounts.find(a => a.id === accountId);
+    if (!account) return null;
+    return (
+      <>
+        <span className="capitalize">{account.type === 'btc' ? 'Bitcoin' : account.type}</span> ({account.accountNumber}) - {account.currency === 'BTC' ? 'Bitcoin ' : '$'}{account.balance.toLocaleString()}
+      </>
+    );
+  };
+
+  const renderAccountCards = (selectedId: string, onSelect: (id: string) => void, excludeAccountId?: string) => {
+    if (isLoading) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[1, 2].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {accounts.map(acc => {
+          const isExcluded = excludeAccountId && acc.id === excludeAccountId;
+          const isSelected = selectedId === acc.id;
+
+          return (
+            <button
+              key={acc.id}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isExcluded) {
+                  if (isSelected) {
+                    onSelect("");
+                  } else {
+                    onSelect(acc.id);
+                  }
+                }
+              }}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${isSelected
+                ? 'border-primary bg-primary/5'
+                : isExcluded
+                  ? 'border-secondary bg-secondary/30 opacity-50 cursor-not-allowed'
+                  : 'border-secondary hover:border-primary/50 cursor-pointer'
+                }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="font-semibold capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</p>
+                  <p className="text-sm text-muted-foreground">{acc.accountNumber}</p>
+                  <p className="text-lg font-bold mt-2">
+                    {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
+                  </p>
+                </div>
+                {isSelected && (
+                  <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <DashboardLayout>
@@ -53,40 +118,14 @@ const Transfers = () => {
                     <CardDescription>Move funds instantly between your own accounts.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label>From Account</Label>
-                        <Select value={fromAccountId} onValueChange={setFromAccountId}>
-                          <SelectTrigger className="rounded-xl h-12">
-                            <SelectValue placeholder="Select account" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {isLoading ? (
-                              <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
-                            ) : accounts.map(acc => (
-                              <SelectItem key={acc.id} value={acc.id}>
-                                <span className="capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</span> ({acc.accountNumber}) - {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-base mb-3 block">From Account</Label>
+                        {renderAccountCards(fromAccountId, setFromAccountId, toAccountId)}
                       </div>
-                      <div className="space-y-2">
-                        <Label>To Account</Label>
-                        <Select value={toAccountId} onValueChange={setToAccountId}>
-                          <SelectTrigger className="rounded-xl h-12">
-                            <SelectValue placeholder="Select account" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {isLoading ? (
-                              <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
-                            ) : accounts.map(acc => (
-                              <SelectItem key={acc.id} value={acc.id}>
-                                <span className="capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</span> ({acc.accountNumber}) - {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div>
+                        <Label className="text-base mb-3 block">To Account</Label>
+                        {renderAccountCards(toAccountId, setToAccountId, fromAccountId)}
                       </div>
                     </div>
 
@@ -131,22 +170,9 @@ const Transfers = () => {
                     <CardDescription>Send money to a bank account outside of Liberty Bell.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <Label>From Account</Label>
-                      <Select value={externalFromAccountId} onValueChange={setExternalFromAccountId}>
-                        <SelectTrigger className="rounded-xl h-12">
-                          <SelectValue placeholder="Select account" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {isLoading ? (
-                            <SelectItem value="loading" disabled>Loading accounts...</SelectItem>
-                          ) : accounts.map(acc => (
-                            <SelectItem key={acc.id} value={acc.id}>
-                              <span className="capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</span> ({acc.accountNumber}) - {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div>
+                      <Label className="text-base mb-3 block">From Account</Label>
+                      {renderAccountCards(externalFromAccountId, setExternalFromAccountId)}
                     </div>
 
                     {accounts.find(a => a.id === externalFromAccountId)?.type === 'btc' ? (

@@ -34,7 +34,15 @@ const SetupWizard = () => {
     const fetchUser = async () => {
       try {
         // Initial check from localStorage to avoid flashing for admins
-        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        let storedUser = null;
+        try {
+          const userString = localStorage.getItem('user');
+          storedUser = userString ? JSON.parse(userString) : null;
+        } catch (parseError) {
+          console.error("Failed to parse stored user", parseError);
+          localStorage.removeItem('user');
+        }
+
         if (storedUser?.role === 'admin') return;
 
         const userData = await profileService.getProfile();
@@ -71,7 +79,7 @@ const SetupWizard = () => {
     if (!file) {
       toast.error("Please select a picture first");
       return;
-    }    
+    }
 
     setIsLoading(true);
     try {

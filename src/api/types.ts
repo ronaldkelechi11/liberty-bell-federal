@@ -215,14 +215,23 @@ export interface PaymentMethod {
   id: string;
   name: string;
   description: string;
+  processingTime: string;
+  minimumAmount?: number;
+  maximumAmount?: number;
 }
 
 export interface CreatePaymentMethodDto {
   name: string;
   description: string;
+  processingTime?: string;
+  minimumAmount?: number;
+  maximumAmount?: number;
 }
 
 export interface UpdatePaymentMethodDto {
   name?: string;
   description?: string;
+  processingTime?: string;
+  minimumAmount?: number;
+  maximumAmount?: number;
 }
