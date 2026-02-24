@@ -8,17 +8,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Building2, User2, ArrowRightCircle, Info, Check } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const Transfers = () => {
+  const queryClient = useQueryClient();
   const [amount, setAmount] = useState("");
   const [fromAccountId, setFromAccountId] = useState("");
   const [toAccountId, setToAccountId] = useState("");
   const [externalFromAccountId, setExternalFromAccountId] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [recipientAccountNumber, setRecipientAccountNumber] = useState("");
+  const [recipientRoutingNumber, setRecipientRoutingNumber] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
   const [transferDescription, setTransferDescription] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtp, setShowOtp] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['accounts'],
@@ -58,11 +67,7 @@ const Transfers = () => {
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isExcluded) {
-                  if (isSelected) {
-                    onSelect("");
-                  } else {
-                    onSelect(acc.id);
-                  }
+                  onSelect(acc.id);
                 }
               }}
               className={`p-4 rounded-xl border-2 text-left transition-all ${isSelected
@@ -75,7 +80,9 @@ const Transfers = () => {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="font-semibold capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</p>
-                  <p className="text-sm text-muted-foreground">{acc.accountNumber}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {acc.type === 'btc' ? 'Wallet: ' : ''}{acc.accountNumber}
+                  </p>
                   <p className="text-lg font-bold mt-2">
                     {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
                   </p>
@@ -156,7 +163,33 @@ const Transfers = () => {
                       />
                     </div>
 
-                    <Button className="w-full h-12 rounded-xl text-lg font-bold gap-2">
+                    <Button
+                      className="w-full h-12 rounded-xl text-lg font-bold gap-2"
+                      loading={isProcessing}
+                      onClick={async () => {
+                        if (!fromAccountId || !toAccountId || !amount) {
+                          toast.error("Please fill in all required fields");
+                          return;
+                        }
+                        setIsProcessing(true);
+                        try {
+                          await accountService.internalTransfer({
+                            fromAccountId,
+                            toAccountId,
+                            amount: parseFloat(amount),
+                            description: transferDescription
+                          });
+                          toast.success("Transfer successful!");
+                          queryClient.invalidateQueries({ queryKey: ['accounts'] });
+                          setAmount("");
+                          setTransferDescription("");
+                        } catch (error: any) {
+                          toast.error(error.message || "Transfer failed");
+                        } finally {
+                          setIsProcessing(false);
+                        }
+                      }}
+                    >
                       Transfer Funds <ArrowRightCircle className="w-5 h-5" />
                     </Button>
                   </CardContent>
@@ -201,19 +234,39 @@ const Transfers = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <Label>Recipient Name</Label>
-                          <Input placeholder="Full name" className="h-12 rounded-xl" />
+                          <Input
+                            placeholder="Full name"
+                            className="h-12 rounded-xl"
+                            value={recipientName}
+                            onChange={(e) => setRecipientName(e.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Bank Name</Label>
-                          <Input placeholder="e.g. Chase, Wells Fargo" className="h-12 rounded-xl" />
+                          <Input
+                            placeholder="e.g. Chase, Wells Fargo"
+                            className="h-12 rounded-xl"
+                            value={bankName}
+                            onChange={(e) => setBankName(e.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Account Number</Label>
-                          <Input placeholder="Enter account number" className="h-12 rounded-xl" />
+                          <Input
+                            placeholder="Enter account number"
+                            className="h-12 rounded-xl"
+                            value={recipientAccountNumber}
+                            onChange={(e) => setRecipientAccountNumber(e.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label>Routing Number</Label>
-                          <Input placeholder="Enter routing number" className="h-12 rounded-xl" />
+                          <Input
+                            placeholder="Enter routing number"
+                            className="h-12 rounded-xl"
+                            value={recipientRoutingNumber}
+                            onChange={(e) => setRecipientRoutingNumber(e.target.value)}
+                          />
                         </div>
                       </div>
                     )}
@@ -245,8 +298,83 @@ const Transfers = () => {
                       />
                     </div>
 
-                    <Button className="w-full h-12 rounded-xl text-lg font-bold gap-2">
-                      Send Funds <Send className="w-5 h-5" />
+                    {showOtp && (
+                      <div className="space-y-2">
+                        <Label>Verification OTP</Label>
+                        <Input
+                          placeholder="Enter 6-digit OTP"
+                          className="h-12 rounded-xl text-center text-lg tracking-widest font-bold"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                          maxLength={6}
+                        />
+                        <p className="text-xs text-muted-foreground text-center">
+                          A verification code has been sent to your email.
+                        </p>
+                      </div>
+                    )}
+
+                    <Button
+                      className="w-full h-12 rounded-xl text-lg font-bold gap-2"
+                      loading={isProcessing}
+                      onClick={async () => {
+                        if (!externalFromAccountId || !amount) {
+                          toast.error("Please select an account and enter an amount");
+                          return;
+                        }
+
+                        if (!showOtp) {
+                          setIsProcessing(true);
+                          try {
+                            await accountService.requestOtp();
+                            setShowOtp(true);
+                            toast.success("OTP sent to your email");
+                          } catch (error: any) {
+                            toast.error(error.message || "Failed to request OTP");
+                          } finally {
+                            setIsProcessing(false);
+                          }
+                          return;
+                        }
+
+                        if (!otp || otp.length !== 6) {
+                          toast.error("Please enter a valid 6-digit OTP");
+                          return;
+                        }
+
+                        setIsProcessing(true);
+                        try {
+                          const isBtc = accounts.find(a => a.id === externalFromAccountId)?.type === 'btc';
+                          await accountService.externalTransfer({
+                            fromAccountId: externalFromAccountId,
+                            recipientName: isBtc ? "Bitcoin Wallet" : recipientName,
+                            recipientAccountNumber: isBtc ? walletAddress : recipientAccountNumber,
+                            recipientRoutingNumber: isBtc ? "BTC" : recipientRoutingNumber,
+                            bankName: isBtc ? "Bitcoin Network" : bankName,
+                            amount: parseFloat(amount),
+                            description: transferDescription,
+                            otp: otp
+                          });
+
+                          toast.success("Transfer request submitted successfully!");
+                          queryClient.invalidateQueries({ queryKey: ['accounts'] });
+                          setAmount("");
+                          setTransferDescription("");
+                          setWalletAddress("");
+                          setRecipientName("");
+                          setBankName("");
+                          setRecipientAccountNumber("");
+                          setRecipientRoutingNumber("");
+                          setOtp("");
+                          setShowOtp(false);
+                        } catch (error: any) {
+                          toast.error(error.message || "Transfer failed");
+                        } finally {
+                          setIsProcessing(false);
+                        }
+                      }}
+                    >
+                      {!showOtp ? "Send Funds" : "Confirm Transfer"} <Send className="w-5 h-5" />
                     </Button>
                   </CardContent>
                 </Card>

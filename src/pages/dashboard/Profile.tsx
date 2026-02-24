@@ -9,10 +9,15 @@ import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/api/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import UploadProfilePictureModal from "@/components/dashboard/UploadProfilePictureModal";
+import ChangePasswordModal from "@/components/dashboard/ChangePasswordModal";
+import ChangeTransferPinModal from "@/components/dashboard/ChangeTransferPinModal";
 import { useState } from "react";
 
 const Profile = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+
   const { data: user, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
@@ -75,13 +80,21 @@ const Profile = () => {
             </Card>
 
             <div className="space-y-4">
-              <Button variant="outline" className="w-full justify-between rounded-xl h-12">
+              <Button
+                variant="outline"
+                className="w-full justify-between rounded-xl h-12"
+                onClick={() => setIsPasswordModalOpen(true)}
+              >
                 <div className="flex items-center gap-3">
                   <Lock className="w-4 h-4" /> Change Password
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </Button>
-              <Button variant="outline" className="w-full justify-between rounded-xl h-12">
+              <Button
+                variant="outline"
+                className="w-full justify-between rounded-xl h-12"
+                onClick={() => setIsPinModalOpen(true)}
+              >
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="w-4 h-4" /> Transfer PIN
                 </div>
@@ -155,6 +168,16 @@ const Profile = () => {
       <UploadProfilePictureModal
         isOpen={isUploadModalOpen}
         onOpenChange={setIsUploadModalOpen}
+      />
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onOpenChange={setIsPasswordModalOpen}
+      />
+
+      <ChangeTransferPinModal
+        isOpen={isPinModalOpen}
+        onOpenChange={setIsPinModalOpen}
       />
     </DashboardLayout>
   );

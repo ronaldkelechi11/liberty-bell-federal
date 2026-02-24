@@ -122,6 +122,7 @@ export interface ExternalTransferDto {
   bankName: string;
   amount: number;
   description: string;
+  otp: string;
 }
 
 export interface AdminCreditDebitDto {

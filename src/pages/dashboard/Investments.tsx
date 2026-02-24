@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { investmentService } from "@/api/investments";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import InvestNowModal from "@/components/dashboard/InvestNowModal";
+import { InvestmentPlan } from "@/api/types";
 import {
   AreaChart,
   Area,
@@ -38,11 +41,19 @@ const stockData = [
 ];
 
 const Investments = () => {
+  const [isInvestModalOpen, setIsInvestModalOpen] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<InvestmentPlan>('starter');
+
   const plans = [
-    { id: 'starter', name: 'Starter Plan', roi: '8.5%', term: '6 Months', min: 500, description: 'Low risk, steady growth for beginners.' },
-    { id: 'balanced', name: 'Balanced Plan', roi: '12.2%', term: '12 Months', min: 2500, description: 'Medium risk with diversified portfolio.' },
-    { id: 'advanced', name: 'Advanced Plan', roi: '18.5%', term: '24 Months', min: 10000, description: 'Higher risk for maximum returns.' },
+    { id: 'starter' as InvestmentPlan, name: 'Starter Plan', roi: '8.5%', term: '6 Months', min: 500, description: 'Low risk, steady growth for beginners.' },
+    { id: 'balanced' as InvestmentPlan, name: 'Balanced Plan', roi: '12.2%', term: '12 Months', min: 2500, description: 'Medium risk with diversified portfolio.' },
+    { id: 'advanced' as InvestmentPlan, name: 'Advanced Plan', roi: '18.5%', term: '24 Months', min: 10000, description: 'Higher risk for maximum returns.' },
   ];
+
+  const handleInvestClick = (planId: InvestmentPlan) => {
+    setSelectedPlanId(planId);
+    setIsInvestModalOpen(true);
+  };
 
   const { data: myInvestments = [], isLoading } = useQuery({
     queryKey: ['investments'],
@@ -60,7 +71,10 @@ const Investments = () => {
             <h1 className="text-2xl font-heading font-bold">Investments</h1>
             <p className="text-muted-foreground">Grow your wealth with our tailored investment plans.</p>
           </div>
-          <Button className="rounded-xl gap-2 bg-green-600 hover:bg-green-700">
+          <Button
+            className="rounded-xl gap-2 bg-green-600 hover:bg-green-700"
+            onClick={() => handleInvestClick('starter')}
+          >
             <Plus className="w-4 h-4" /> New Investment
           </Button>
         </div>
@@ -199,7 +213,12 @@ const Investments = () => {
                   </div>
                   <div className="pt-4 border-t border-border mt-auto">
                     <p className="text-sm text-muted-foreground mb-4">Minimum Investment: <span className="font-bold text-foreground">${plan.min}</span></p>
-                    <Button className="w-full rounded-xl">Invest Now</Button>
+                    <Button
+                      className="w-full rounded-xl"
+                      onClick={() => handleInvestClick(plan.id)}
+                    >
+                      Invest Now
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -268,6 +287,12 @@ const Investments = () => {
           )}
         </div>
       </div>
+
+      <InvestNowModal
+        isOpen={isInvestModalOpen}
+        onOpenChange={setIsInvestModalOpen}
+        initialPlanId={selectedPlanId}
+      />
     </DashboardLayout>
   );
 };
