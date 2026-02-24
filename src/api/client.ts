@@ -58,6 +58,17 @@ export const initializeAuth = async () => {
 };
 
 // Response interceptor to return data directly and handle errors
+axiosAuthenticatedInstance.interceptors.request.use(
+    (config) => {
+        // Remove Content-Type header for FormData to allow browser to set it with boundary
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 axiosAuthenticatedInstance.interceptors.response.use(
     (response) => response.data,
     (error) => {
