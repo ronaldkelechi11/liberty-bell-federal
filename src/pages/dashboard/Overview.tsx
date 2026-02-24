@@ -110,7 +110,12 @@ const Overview = () => {
                 <Button size="sm" variant="secondary" className="bg-white text-primary hover:bg-white/90" onClick={() => navigate('/dashboard/transfers')}>
                   <ArrowUpRight className="w-4 h-4 mr-1" /> Send
                 </Button>
-                <Button size="sm" variant="secondary" className="bg-white/20 border-none text-white hover:bg-white/30">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="bg-white/20 border-none text-white hover:bg-white/30"
+                  onClick={() => navigate('/dashboard/deposits')}
+                >
                   <ArrowDownLeft className="w-4 h-4 mr-1" /> Add Money
                 </Button>
               </div>

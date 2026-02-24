@@ -3,11 +3,16 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Plus, MoreHorizontal, ShieldCheck, Zap, Lock } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cardService } from "@/api/cards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import CreateVirtualCardModal from "@/components/dashboard/CreateVirtualCardModal";
+import { toast } from "sonner";
 
 const Cards = () => {
+  const queryClient = useQueryClient();
+  const [isVirtualModalOpen, setIsVirtualModalOpen] = useState(false);
   const { data: cards = [], isLoading } = useQuery({
     queryKey: ['cards'],
     queryFn: () => cardService.getCards(),
@@ -70,13 +75,36 @@ const Cards = () => {
                   </Card>
 
                   <div className="mt-4 flex gap-3">
-                    <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl flex-1 gap-2"
+                      onClick={() => toast.info(`Management options for card ending in ${card.cardNumber.slice(-4)} are currently being prepared.`)}
+                    >
                       <ShieldCheck className="w-4 h-4" /> Manage
                     </Button>
-                    <Button variant="outline" size="sm" className="rounded-xl flex-1 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl flex-1 gap-2"
+                      onClick={async () => {
+                        try {
+                          await cardService.updateCard(card.id, { status: card.status === 'active' ? 'frozen' : 'active' });
+                          toast.success(`Card ${card.status === 'active' ? 'frozen' : 'activated'} successfully`);
+                          queryClient.invalidateQueries({ queryKey: ['cards'] });
+                        } catch (error: any) {
+                          toast.error(error.message || "Action failed");
+                        }
+                      }}
+                    >
                       <Lock className="w-4 h-4" /> {card.status === 'active' ? 'Freeze' : 'Unfreeze'}
                     </Button>
-                    <Button variant="outline" size="icon" className="rounded-xl">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="rounded-xl"
+                      onClick={() => toast.info("Additional card settings will be available soon.")}
+                    >
                       <MoreHorizontal className="w-4 h-4" />
                     </Button>
                   </div>
@@ -130,7 +158,13 @@ const Cards = () => {
                   </div>
                   <h4 className="font-bold">Virtual Cards</h4>
                   <p className="text-xs text-muted-foreground mt-2">Create disposable virtual cards for secure online shopping.</p>
-                  <Button variant="link" className="p-0 text-primary mt-2 h-auto">Create Virtual Card</Button>
+                  <Button
+                    variant="link"
+                    className="p-0 text-primary mt-2 h-auto"
+                    onClick={() => setIsVirtualModalOpen(true)}
+                  >
+                    Create Virtual Card
+                  </Button>
                 </CardContent>
               </Card>
               <Card className="border-none shadow-sm bg-indigo-50">
@@ -147,6 +181,11 @@ const Cards = () => {
           </div>
         </div>
       </div>
+
+      <CreateVirtualCardModal
+        isOpen={isVirtualModalOpen}
+        onOpenChange={setIsVirtualModalOpen}
+      />
     </DashboardLayout>
   );
 };
