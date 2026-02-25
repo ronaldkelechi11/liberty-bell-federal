@@ -49,9 +49,11 @@ const SetupWizard = () => {
         setUser(userData);
 
         if (userData?.role === 'admin') return;
+        console.log("User data: " + JSON.stringify(userData));
+
 
         // Check if setup is needed - Only show if transfer PIN is not set
-        if (userData && !userData.hasTransferPin) {
+        if (userData.transferPinSet == false) {
           setIsOpen(true);
           if (userData.profilePicture) {
             setStep(2); // Skip to PIN setup if picture is already there
