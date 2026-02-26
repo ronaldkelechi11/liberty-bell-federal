@@ -57,8 +57,8 @@ const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProp
             </div>
 
             <div className="lg:hidden flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-heading font-bold text-xs">LB</span>
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+                <img src="/logo_liberty.jpg" alt="Liberty Bell Logo" className="w-full h-full " />
               </div>
               <span className="font-heading font-bold text-sm">Liberty Bell Federal Bank</span>
             </div>

@@ -54,8 +54,8 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
     <div className="hidden lg:flex flex-col w-64 bg-card border-r border-border h-screen sticky top-0">
       <div className="p-6">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-white font-heading font-bold">LB</span>
+          <div className="w-10 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <img src="/logo_liberty.jpg" alt="Liberty Bell Logo" className="w-full h-full" />
           </div>
           <span className="font-heading text-xl font-bold text-foreground">Liberty Bell Federal Bank</span>
         </Link>
@@ -108,10 +108,10 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
       </nav>
 
       <div className="p-4 border-t border-border space-y-2">
-        <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+        {/* <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
           <Settings className="w-5 h-5" />
           Settings
-        </Link>
+        </Link> */}
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 px-3 py-2 rounded-xl text-sm font-medium text-destructive hover:text-destructive hover:bg-destructive/10"

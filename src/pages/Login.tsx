@@ -53,8 +53,6 @@ const Login = () => {
     try {
       const response = await authService.login(values);
 
-      console.log(response);
-
       // If backend already issues token (e.g. admin bypass OTP)
       if (response.access_token) {
         await setTokens(response.access_token);

@@ -49,7 +49,6 @@ const SetupWizard = () => {
         setUser(userData);
 
         if (userData?.role === 'admin') return;
-        console.log("User data: " + JSON.stringify(userData));
 
 
         // Check if setup is needed - Only show if transfer PIN is not set

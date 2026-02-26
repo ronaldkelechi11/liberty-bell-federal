@@ -170,7 +170,7 @@ const Register = () => {
     <div className="min-h-screen bg-secondary/30 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex flex-col items-center">
-          <Link to="/" className="flex items-center gap-2 mb-6">
+          <Link to="/" className="flex` items-center gap-2 mb-6">
             <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center">
               <img src="/logo_liberty.jpg" alt="Liberty Bell Federal Bank Logo" className="w-full h-full rounded-lg" />
             </div>

@@ -1,54 +1,57 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Building2, User2, ArrowRightCircle, Info, Check } from "lucide-react";
+import { Send, Building2, User2, ArrowRightCircle, Check } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 const Transfers = () => {
   const queryClient = useQueryClient();
+
   const [amount, setAmount] = useState("");
   const [fromAccountId, setFromAccountId] = useState("");
   const [toAccountId, setToAccountId] = useState("");
   const [externalFromAccountId, setExternalFromAccountId] = useState("");
-  const [recipientName, setRecipientName] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [recipientAccountNumber, setRecipientAccountNumber] = useState("");
-  const [recipientRoutingNumber, setRecipientRoutingNumber] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
   const [transferDescription, setTransferDescription] = useState("");
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { data: accounts = [], isLoading } = useQuery({
-    queryKey: ['accounts'],
+  const { data: rawAccounts = [], isLoading } = useQuery({
+    queryKey: ["accounts"],
     queryFn: () => accountService.getMyAccounts(),
   });
 
-  const getAccountDisplayText = (accountId: string) => {
-    const account = accounts.find(a => a.id === accountId);
-    if (!account) return null;
-    return (
-      <>
-        <span className="capitalize">{account.type === 'btc' ? 'Bitcoin' : account.type}</span> ({account.accountNumber}) - {account.currency === 'BTC' ? 'Bitcoin ' : '$'}{account.balance.toLocaleString()}
-      </>
-    );
-  };
+  const accounts = useMemo(() => {
+    return rawAccounts.map((acc: any) => ({
+      ...acc,
+      id: acc.id || acc._id,
+    }));
+  }, [rawAccounts]);
 
-  const renderAccountCards = (selectedId: string, onSelect: (id: string) => void, excludeAccountId?: string) => {
+  useEffect(() => {
+    setShowOtp(false);
+    setOtp("");
+  }, [externalFromAccountId]);
+
+  const renderAccountCards = (
+    selectedId: string,
+    onSelect: (id: string) => void,
+    excludeAccountId?: string
+  ) => {
     if (isLoading) {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {[1, 2].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          {[1, 2].map(i => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
         </div>
       );
     }
@@ -56,39 +59,47 @@ const Transfers = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {accounts.map(acc => {
-          const isExcluded = excludeAccountId && acc.id === excludeAccountId;
+          const isExcluded = excludeAccountId === acc.id;
           const isSelected = selectedId === acc.id;
 
           return (
             <button
               key={acc.id}
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isExcluded) {
+              disabled={isExcluded}
+              onClick={() => {
+                if (isExcluded) return;
+
+                // 🔥 Toggle select / unselect
+                if (isSelected) {
+                  onSelect("");
+                } else {
                   onSelect(acc.id);
                 }
               }}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${isSelected
-                ? 'border-primary bg-primary/5'
-                : isExcluded
-                  ? 'border-secondary bg-secondary/30 opacity-50 cursor-not-allowed'
-                  : 'border-secondary hover:border-primary/50 cursor-pointer'
+              className={`p-4 rounded-xl border-2 text-left transition-all
+                ${isSelected
+                  ? "border-primary bg-primary/5"
+                  : isExcluded
+                    ? "border-muted bg-muted/30 opacity-50 cursor-not-allowed"
+                    : "border-secondary hover:border-primary/50"
                 }`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="font-semibold capitalize">{acc.type === 'btc' ? 'Bitcoin' : acc.type}</p>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold capitalize">
+                    {acc.type === "btc" ? "Bitcoin" : acc.type}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {acc.type === 'btc' ? 'Wallet: ' : ''}{acc.accountNumber}
+                    {acc.accountNumber}
                   </p>
                   <p className="text-lg font-bold mt-2">
-                    {acc.currency === 'BTC' ? 'Bitcoin ' : '$'}{acc.balance.toLocaleString()}
+                    {acc.currency === "BTC" ? "Bitcoin " : "$"}
+                    {Number(acc.balance).toLocaleString()}
                   </p>
                 </div>
                 {isSelected && (
-                  <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                  <Check className="w-5 h-5 text-primary" />
                 )}
               </div>
             </button>
@@ -101,309 +112,196 @@ const Transfers = () => {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-2xl font-heading font-bold">Transfer Funds</h1>
-          <p className="text-muted-foreground">Send money to your other accounts or to someone else.</p>
-        </div>
+        <h1 className="text-2xl font-bold">Transfer Funds</h1>
 
-        <Tabs defaultValue="internal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 rounded-2xl p-1 h-14 bg-secondary/50">
-            <TabsTrigger value="internal" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2">
-              <User2 className="w-4 h-4" /> Internal
+        <Tabs defaultValue="internal">
+          <TabsList className="grid grid-cols-2 h-14 rounded-2xl">
+            <TabsTrigger value="internal">
+              <User2 className="w-4 h-4 mr-2" /> Internal
             </TabsTrigger>
-            <TabsTrigger value="external" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2">
-              <Building2 className="w-4 h-4" /> External Bank
+            <TabsTrigger value="external">
+              <Building2 className="w-4 h-4 mr-2" /> External
             </TabsTrigger>
           </TabsList>
 
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <TabsContent value="internal" className="mt-0">
-                <Card className="border-none shadow-lg">
-                  <CardHeader>
-                    <CardTitle>Transfer between accounts</CardTitle>
-                    <CardDescription>Move funds instantly between your own accounts.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-base mb-3 block">From Account</Label>
-                        {renderAccountCards(fromAccountId, setFromAccountId, toAccountId)}
-                      </div>
-                      <div>
-                        <Label className="text-base mb-3 block">To Account</Label>
-                        {renderAccountCards(toAccountId, setToAccountId, fromAccountId)}
-                      </div>
-                    </div>
+          {/* ================= INTERNAL ================= */}
+          <TabsContent value="internal">
+            <Card>
+              <CardHeader>
+                <CardTitle>Internal Transfer</CardTitle>
+                <CardDescription>
+                  Move money between your accounts instantly.
+                </CardDescription>
+              </CardHeader>
 
-                    <div className="space-y-2">
-                      <Label>Amount</Label>
-                      <div className="relative">
-                        <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold ${accounts.find(a => a.id === fromAccountId)?.currency === 'BTC' ? 'text-sm' : 'text-lg'}`}>
-                          {accounts.find(a => a.id === fromAccountId)?.currency === 'BTC' ? 'Bitcoin' : '$'}
-                        </span>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          className={`${accounts.find(a => a.id === fromAccountId)?.currency === 'BTC' ? 'pl-20' : 'pl-8'} h-12 text-lg font-bold rounded-xl`}
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                        />
-                      </div>
-                    </div>
+              <CardContent className="space-y-6">
 
-                    <div className="space-y-2">
-                      <Label>Description (Optional)</Label>
-                      <Textarea
-                        placeholder="What's this for?"
-                        className="rounded-xl resize-none"
-                        rows={3}
-                        value={transferDescription}
-                        onChange={(e) => setTransferDescription(e.target.value)}
-                      />
-                    </div>
+                <div>
+                  <Label className="block mb-2">From Account <span className="text-red-500">*</span> </Label>
+                  {renderAccountCards(fromAccountId, setFromAccountId, toAccountId)}
+                </div>
 
-                    <Button
-                      className="w-full h-12 rounded-xl text-lg font-bold gap-2"
-                      loading={isProcessing}
-                      onClick={async () => {
-                        if (!fromAccountId || !toAccountId || !amount) {
-                          toast.error("Please fill in all required fields");
-                          return;
-                        }
-                        setIsProcessing(true);
-                        try {
-                          await accountService.internalTransfer({
-                            fromAccountId,
-                            toAccountId,
-                            amount: parseFloat(amount),
-                            description: transferDescription
-                          });
-                          toast.success("Transfer successful!");
-                          queryClient.invalidateQueries({ queryKey: ['accounts'] });
-                          setAmount("");
-                          setTransferDescription("");
-                        } catch (error: any) {
-                          toast.error(error.message || "Transfer failed");
-                        } finally {
-                          setIsProcessing(false);
-                        }
-                      }}
-                    >
-                      Transfer Funds <ArrowRightCircle className="w-5 h-5" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                <div>
+                  <Label className="block mb-2">To Account <span className="text-red-500">*</span> </Label>
+                  {renderAccountCards(toAccountId, setToAccountId, fromAccountId)}
+                </div>
 
-              <TabsContent value="external" className="mt-0">
-                <Card className="border-none shadow-lg">
-                  <CardHeader>
-                    <CardTitle>External Bank Transfer</CardTitle>
-                    <CardDescription>Send money to a bank account outside of Liberty Bell.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <Label className="text-base mb-3 block">From Account</Label>
-                      {renderAccountCards(externalFromAccountId, setExternalFromAccountId)}
-                    </div>
+                <div>
+                  <Label>Amount <span className="text-red-500">*</span> </Label>
+                  <Input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
 
-                    {accounts.find(a => a.id === externalFromAccountId)?.type === 'btc' ? (
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <Label>Wallet Address</Label>
-                          <Input
-                            placeholder="Enter Bitcoin wallet address (e.g. 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa)"
-                            className="h-12 rounded-xl"
-                            value={walletAddress}
-                            onChange={(e) => setWalletAddress(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Transfer Description</Label>
-                          <Textarea
-                            placeholder="Note for this Bitcoin transfer"
-                            className="rounded-xl resize-none"
-                            rows={3}
-                            value={transferDescription}
-                            onChange={(e) => setTransferDescription(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label>Recipient Name</Label>
-                          <Input
-                            placeholder="Full name"
-                            className="h-12 rounded-xl"
-                            value={recipientName}
-                            onChange={(e) => setRecipientName(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Bank Name</Label>
-                          <Input
-                            placeholder="e.g. Chase, Wells Fargo"
-                            className="h-12 rounded-xl"
-                            value={bankName}
-                            onChange={(e) => setBankName(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Account Number</Label>
-                          <Input
-                            placeholder="Enter account number"
-                            className="h-12 rounded-xl"
-                            value={recipientAccountNumber}
-                            onChange={(e) => setRecipientAccountNumber(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Routing Number</Label>
-                          <Input
-                            placeholder="Enter routing number"
-                            className="h-12 rounded-xl"
-                            value={recipientRoutingNumber}
-                            onChange={(e) => setRecipientRoutingNumber(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    )}
+                {/* ✅ Description under amount */}
+                <div>
+                  <Label>Description <span className="text-red-500">*</span> </Label>
+                  <Textarea
+                    value={transferDescription}
+                    onChange={(e) => setTransferDescription(e.target.value)}
+                    placeholder="What's this transfer for?"
+                    rows={3}
+                  />
+                </div>
 
-                    <div className="space-y-2">
-                      <Label>Amount</Label>
-                      <div className="relative">
-                        <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold ${accounts.find(a => a.id === externalFromAccountId)?.currency === 'BTC' ? 'text-sm' : 'text-lg'}`}>
-                          {accounts.find(a => a.id === externalFromAccountId)?.currency === 'BTC' ? 'Bitcoin' : '$'}
-                        </span>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          className={`${accounts.find(a => a.id === externalFromAccountId)?.currency === 'BTC' ? 'pl-20' : 'pl-8'} h-12 text-lg font-bold rounded-xl`}
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                        />
-                      </div>
-                    </div>
+                <Button
+                  className="w-full"
+                  loading={isProcessing}
+                  onClick={async () => {
+                    if (!fromAccountId || !toAccountId || !amount) {
+                      toast.error("Fill all required fields");
+                      return;
+                    }
 
-                    <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Textarea
-                        placeholder="Note for recipient"
-                        className="rounded-xl resize-none"
-                        rows={3}
-                        value={transferDescription}
-                        onChange={(e) => setTransferDescription(e.target.value)}
-                      />
-                    </div>
+                    if (fromAccountId === toAccountId) {
+                      toast.error("Cannot transfer to same account");
+                      return;
+                    }
 
-                    {showOtp && (
-                      <div className="space-y-2">
-                        <Label>Verification OTP</Label>
-                        <Input
-                          placeholder="Enter 6-digit OTP"
-                          className="h-12 rounded-xl text-center text-lg tracking-widest font-bold"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          maxLength={6}
-                        />
-                        <p className="text-xs text-muted-foreground text-center">
-                          A verification code has been sent to your email.
-                        </p>
-                      </div>
-                    )}
+                    setIsProcessing(true);
+                    try {
+                      await accountService.internalTransfer({
+                        fromAccountId,
+                        toAccountId,
+                        amount: parseFloat(amount),
+                        description: transferDescription,
+                      });
 
-                    <Button
-                      className="w-full h-12 rounded-xl text-lg font-bold gap-2"
-                      loading={isProcessing}
-                      onClick={async () => {
-                        if (!externalFromAccountId || !amount) {
-                          toast.error("Please select an account and enter an amount");
-                          return;
-                        }
+                      toast.success("Transfer successful");
+                      queryClient.invalidateQueries({ queryKey: ["accounts"] });
 
-                        if (!showOtp) {
-                          setIsProcessing(true);
-                          try {
-                            await accountService.requestOtp();
-                            setShowOtp(true);
-                            toast.success("OTP sent to your email");
-                          } catch (error: any) {
-                            toast.error(error.message || "Failed to request OTP");
-                          } finally {
-                            setIsProcessing(false);
-                          }
-                          return;
-                        }
+                      setAmount("");
+                      setTransferDescription("");
+                    } catch (err: any) {
+                      toast.error(err.message || "Transfer failed");
+                    } finally {
+                      setIsProcessing(false);
+                    }
+                  }}
+                >
+                  Transfer <ArrowRightCircle className="ml-2 w-4 h-4" />
+                </Button>
 
-                        if (!otp || otp.length !== 6) {
-                          toast.error("Please enter a valid 6-digit OTP");
-                          return;
-                        }
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                        setIsProcessing(true);
-                        try {
-                          const isBtc = accounts.find(a => a.id === externalFromAccountId)?.type === 'btc';
-                          await accountService.externalTransfer({
-                            fromAccountId: externalFromAccountId,
-                            recipientName: isBtc ? "Bitcoin Wallet" : recipientName,
-                            recipientAccountNumber: isBtc ? walletAddress : recipientAccountNumber,
-                            recipientRoutingNumber: isBtc ? "BTC" : recipientRoutingNumber,
-                            bankName: isBtc ? "Bitcoin Network" : bankName,
-                            amount: parseFloat(amount),
-                            description: transferDescription,
-                            otp: otp
-                          });
+          {/* ================= EXTERNAL ================= */}
+          <TabsContent value="external">
+            <Card>
+              <CardHeader>
+                <CardTitle>External Transfer</CardTitle>
+                <CardDescription>
+                  Send money outside the bank.
+                </CardDescription>
+              </CardHeader>
 
-                          toast.success("Transfer request submitted successfully!");
-                          queryClient.invalidateQueries({ queryKey: ['accounts'] });
-                          setAmount("");
-                          setTransferDescription("");
-                          setWalletAddress("");
-                          setRecipientName("");
-                          setBankName("");
-                          setRecipientAccountNumber("");
-                          setRecipientRoutingNumber("");
-                          setOtp("");
-                          setShowOtp(false);
-                        } catch (error: any) {
-                          toast.error(error.message || "Transfer failed");
-                        } finally {
-                          setIsProcessing(false);
-                        }
-                      }}
-                    >
-                      {!showOtp ? "Send Funds" : "Confirm Transfer"} <Send className="w-5 h-5" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </div>
+              <CardContent className="space-y-6">
 
-            <div className="space-y-6">
-              <Card className="bg-primary/5 border-primary/10">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Info className="w-4 h-4 text-primary" /> Transfer Info
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 text-sm">
-                  <p>Internal transfers are processed <span className="font-bold text-primary">instantly</span>.</p>
-                  <p>External transfers may take <span className="font-bold">1-3 business days</span> to complete.</p>
-                  <p>Daily limit for external transfers is <span className="font-bold">$10,000.00</span>.</p>
-                </CardContent>
-              </Card>
+                <div>
+                  <Label className="block mb-2">From Account <span className="text-red-500">*</span> </Label>
+                  {renderAccountCards(externalFromAccountId, setExternalFromAccountId)}
+                </div>
 
-              <Alert className="bg-amber-50 border-amber-200 text-amber-800 rounded-2xl">
-                <Info className="h-4 w-4 text-amber-600" />
-                <AlertTitle className="font-bold">Security Tip</AlertTitle>
-                <AlertDescription className="text-xs">
-                  Always verify the recipient's bank details before confirming. Liberty Bell is not responsible for funds sent to incorrect accounts.
-                </AlertDescription>
-              </Alert>
-            </div>
-          </div>
+                <div>
+                  <Label>Amount <span className="text-red-500">*</span> </Label>
+                  <Input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                {/* ✅ Description under amount */}
+                <div>
+                  <Label>Description <span className="text-red-500">*</span> </Label>
+                  <Textarea
+                    value={transferDescription}
+                    onChange={(e) => setTransferDescription(e.target.value)}
+                    placeholder="Add a note for this transfer"
+                    rows={3}
+                  />
+                </div>
+
+                {showOtp && (
+                  <Input
+                    placeholder="Enter 6-digit OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    maxLength={6}
+                  />
+                )}
+
+                <Button
+                  className="w-full"
+                  loading={isProcessing}
+                  onClick={async () => {
+                    if (!externalFromAccountId || !amount) {
+                      toast.error("Select account and enter amount");
+                      return;
+                    }
+
+                    if (!showOtp) {
+                      setShowOtp(true);
+                      toast.success("OTP sent");
+                      return;
+                    }
+
+                    setIsProcessing(true);
+                    try {
+                      await accountService.externalTransfer({
+                        fromAccountId: externalFromAccountId,
+                        amount: parseFloat(amount),
+                        description: transferDescription,
+                        otp,
+                      });
+
+                      toast.success("Transfer submitted");
+                      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+
+                      setAmount("");
+                      setTransferDescription("");
+                      setOtp("");
+                      setShowOtp(false);
+                    } catch (err: any) {
+                      toast.error(err.message || "Transfer failed");
+                    } finally {
+                      setIsProcessing(false);
+                    }
+                  }}
+                >
+                  {!showOtp ? "Send Funds" : "Confirm Transfer"}
+                  <Send className="ml-2 w-4 h-4" />
+                </Button>
+
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
       </div>
     </DashboardLayout>
