@@ -146,8 +146,8 @@ const Register = () => {
         country: values.country,
         accountType: (
           values.accountType === "Current / Premium" ? "current" :
-          values.accountType === "Bitcoin" ? "btc" :
-          values.accountType.toLowerCase()
+            values.accountType === "Bitcoin" ? "btc" :
+              values.accountType.toLowerCase()
         ) as AccountType,
         securityQuestion: values.securityQuestion,
         securityAnswer: values.securityAnswer,
@@ -171,10 +171,10 @@ const Register = () => {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex flex-col items-center">
           <Link to="/" className="flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-white font-heading font-bold text-lg">LB</span>
+            <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center">
+              <img src="/logo_liberty.jpg" alt="Liberty Bell Federal Bank Logo" className="w-full h-full rounded-lg" />
             </div>
-            <span className="font-heading text-2xl font-bold text-foreground tracking-tight">Liberty Bell</span>
+            <span className="font-heading text-2xl font-bold text-foreground tracking-tight">Liberty Bell Federal Bank</span>
           </Link>
           <h1 className="text-3xl font-heading font-bold text-center">Create Your Account</h1>
           <p className="text-muted-foreground text-center mt-2">Join Liberty Bell today and start your journey to financial freedom.</p>

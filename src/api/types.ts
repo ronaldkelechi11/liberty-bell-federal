@@ -26,7 +26,7 @@ export interface User {
   zipCode: string;
   country: string;
   isEmailVerified: boolean;
-  hasTransferPin: boolean;
+  transferPinSet: boolean;
 }
 
 export interface RegisterDto {

@@ -53,7 +53,7 @@ const SetupWizard = () => {
 
 
         // Check if setup is needed - Only show if transfer PIN is not set
-        if (userData.transferPinSet == false) {
+        if (userData.transferPin == "0000") {
           setIsOpen(true);
           if (userData.profilePicture) {
             setStep(2); // Skip to PIN setup if picture is already there

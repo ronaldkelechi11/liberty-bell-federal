@@ -7,8 +7,8 @@ const Footer = () => (
       <div className="grid md:grid-cols-4 gap-8 mb-12">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-heading font-bold text-sm">LB</span>
+            <div className="w-16 h-16 rounded-lg bg-primary flex items-center justify-center">
+              <img src="/logo_liberty.jpg" alt="Liberty Bell Federal Bank Logo" className="w-full h-full rounded-lg" />
             </div>
             <span className="font-heading text-lg font-bold text-primary-foreground">Liberty Bell</span>
           </div>
@@ -17,7 +17,7 @@ const Footer = () => (
             <br />
           </p>
           <p className="text-sm leading-relaxed text-white">
-          Ohio, United States of America.
+            Ohio, United States of America.
           </p>
         </div>
         <div>
@@ -60,8 +60,8 @@ const Footer = () => (
           <span>NMLS #123456</span>
         </div>
         <p className="text-xs leading-relaxed">
-          Liberty Bell Federal Bank is a fictitious bank created for demonstration purposes. 
-          Deposits are insured by the FDIC up to $250,000 per depositor, per insured bank. 
+          Liberty Bell Federal Bank is a fictitious bank created for demonstration purposes.
+          Deposits are insured by the FDIC up to $250,000 per depositor, per insured bank.
           Equal Housing Lender. © {new Date().getFullYear()} Liberty Bell Federal Bank. All rights reserved.
         </p>
       </div>

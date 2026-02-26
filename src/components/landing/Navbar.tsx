@@ -26,17 +26,17 @@ const Navbar = () => {
   return (
     <nav
       className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl transition-all duration-300 rounded-2xl ${scrolled
-          ? "bg-card/95 backdrop-blur-md shadow-lg border border-border"
-          : "bg-card/60 backdrop-blur-sm border border-border/50 shadow-md"
+        ? "bg-card/95 backdrop-blur-md shadow-lg border border-border"
+        : "bg-card/60 backdrop-blur-sm border border-border/50 shadow-md"
         }`}
     >
       <div className="flex items-center justify-between py-3 px-5">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading font-bold text-sm">LB</span>
+            <img src="/logo_liberty.jpg" alt="" />
           </div>
           <span className="font-heading text-lg font-bold text-foreground tracking-tight">
-            Liberty Bell Fedaral
+            Liberty Bell Fedaral Bank
           </span>
         </Link>
 

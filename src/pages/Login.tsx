@@ -54,7 +54,7 @@ const Login = () => {
       const response = await authService.login(values);
 
       console.log(response);
-      
+
       // If backend already issues token (e.g. admin bypass OTP)
       if (response.access_token) {
         await setTokens(response.access_token);
@@ -123,10 +123,10 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-primary items-center justify-center p-12 relative overflow-hidden">
         <div className="relative z-10 text-primary-foreground max-w-lg">
           <Link to="/" className="inline-flex items-center gap-2 mb-12 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
-              <span className="text-primary font-bold text-lg">LB</span>
+            <div className="w-24 h-24 rounded-xl bg-white flex items-center justify-center">
+              <img src="/logo_liberty.jpg" alt="Liberty Bell Federal Bank Logo" className="w-full h-full rounded-lg" />
             </div>
-            <span className="text-2xl font-bold tracking-tight">Liberty Bell</span>
+            <span className="text-2xl font-bold tracking-tight">Liberty Bell Federal Bank</span>
           </Link>
 
           <h2 className="text-4xl font-bold mb-6">
@@ -236,7 +236,7 @@ const Login = () => {
       {/* OTP MODAL */}
       <OtpModal
         isOpen={showOtpModal}
-        onClose={() => {}} // Prevent accidental close for banking security
+        onClose={() => { }} // Prevent accidental close for banking security
         onVerify={handleOtpVerify}
         emailOrPhone={loginData?.username || "your registered device"}
         loading={isOtpLoading}
