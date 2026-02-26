@@ -91,7 +91,7 @@ const TransactionReceiptModal = ({
 
         <div className="text-center mt-4">
           <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-            Liberty Bell Federal
+            Liberty Bell Federal Bank
           </p>
         </div>
       </DialogContent>
