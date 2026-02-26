@@ -12,11 +12,14 @@ import {
   BarChart3,
   Users,
   ShieldCheck,
-  ArrowDownLeft
+  ArrowDownLeft,
+  History,
+  Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/api/auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface SidebarProps {
   isAdmin?: boolean;
@@ -45,7 +48,9 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
   const adminLinks = [
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "User Accounts", href: "/admin/accounts", icon: Users },
+    { name: "Transactions", href: "/admin/transactions", icon: History },
     { name: "Payments", href: "/admin/payment-methods", icon: ShieldCheck },
+    { name: "System Settings", href: "/admin/settings", icon: Settings2 },
   ];
 
   const isActive = (path: string) => location.pathname === path;
