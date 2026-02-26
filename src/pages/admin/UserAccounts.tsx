@@ -10,7 +10,10 @@ import {
   Lock,
   Unlock,
   CreditCard,
-  Ban
+  Ban,
+  Mail,
+  ShieldAlert,
+  History
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
@@ -33,8 +36,16 @@ const UserAccounts = () => {
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-heading font-bold">Manage User Accounts</h1>
-            <p className="text-muted-foreground">Monitor balances, freeze accounts, and manage limits.</p>
+            <h1 className="text-2xl font-heading font-bold text-foreground">User Management</h1>
+            <p className="text-muted-foreground">Monitor balances, freeze accounts, and manage user limits across the platform.</p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="rounded-xl gap-2">
+              <Mail className="w-4 h-4" /> Message All
+            </Button>
+            <Button className="rounded-xl gap-2 bg-primary hover:bg-primary/90">
+              <User className="w-4 h-4" /> Create User
+            </Button>
           </div>
         </div>
 
@@ -97,8 +108,10 @@ const UserAccounts = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem className="gap-2"><User className="w-4 h-4" /> View Profile</DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2"><History className="w-4 h-4" /> Transactions</DropdownMenuItem>
                             <DropdownMenuItem className="gap-2"><CreditCard className="w-4 h-4" /> Credit Account</DropdownMenuItem>
                             <DropdownMenuItem className="gap-2"><Ban className="w-4 h-4" /> Debit Account</DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2"><ShieldAlert className="w-4 h-4" /> Reset 2FA</DropdownMenuItem>
                             {u.status === 'Active' ? (
                               <DropdownMenuItem className="gap-2 text-destructive"><Lock className="w-4 h-4" /> Freeze Account</DropdownMenuItem>
                             ) : (

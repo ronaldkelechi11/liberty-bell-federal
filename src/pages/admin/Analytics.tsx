@@ -17,7 +17,10 @@ import {
   Tooltip,
   ResponsiveContainer,
   LineChart,
-  Line
+  Line,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
 
 const Analytics = () => {
@@ -35,6 +38,12 @@ const Analytics = () => {
     { name: 'Apr', deposits: 2780, withdrawals: 3908 },
     { name: 'May', deposits: 1890, withdrawals: 4800 },
     { name: 'Jun', deposits: 2390, withdrawals: 3800 },
+  ];
+
+  const pieData = [
+    { name: 'Active', value: 85, color: 'hsl(var(--primary))' },
+    { name: 'Inactive', value: 10, color: 'hsl(var(--muted))' },
+    { name: 'Suspended', value: 5, color: '#ef4444' },
   ];
 
   return (
@@ -63,7 +72,7 @@ const Analytics = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card>
+          <Card className="border-none shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" /> Financial Flow
@@ -76,7 +85,7 @@ const Analytics = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
                   <Bar dataKey="deposits" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="withdrawals" fill="hsl(var(--muted))" radius={[4, 4, 0, 0]} />
@@ -85,7 +94,7 @@ const Analytics = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-none shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-primary" /> User Growth
@@ -98,11 +107,73 @@ const Analytics = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
                   <Line type="monotone" dataKey="deposits" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <Card className="lg:col-span-2 border-none shadow-sm">
+            <CardHeader>
+              <CardTitle>System Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {[
+                  { label: 'CPU Usage', value: 34, color: 'bg-primary' },
+                  { label: 'Memory Usage', value: 56, color: 'bg-blue-500' },
+                  { label: 'API Latency', value: 12, color: 'bg-green-500' },
+                  { label: 'Error Rate', value: 0.2, color: 'bg-red-500' },
+                ].map((p) => (
+                  <div key={p.label} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium">{p.label}</span>
+                      <span className="text-muted-foreground">{p.value}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                      <div className={`h-full ${p.color}`} style={{ width: `${p.value}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm">
+            <CardHeader>
+              <CardTitle>User Status Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex justify-center gap-4 mt-4">
+                {pieData.map((d) => (
+                  <div key={d.name} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
+                    <span className="text-xs text-muted-foreground">{d.name}</span>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>

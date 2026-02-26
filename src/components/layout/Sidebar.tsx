@@ -12,11 +12,14 @@ import {
   BarChart3,
   Users,
   ShieldCheck,
-  ArrowDownLeft
+  ArrowDownLeft,
+  History,
+  Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { authService } from "@/api/auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface SidebarProps {
   isAdmin?: boolean;
@@ -45,7 +48,9 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
   const adminLinks = [
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "User Accounts", href: "/admin/accounts", icon: Users },
+    { name: "Transactions", href: "/admin/transactions", icon: History },
     { name: "Payments", href: "/admin/payment-methods", icon: ShieldCheck },
+    { name: "System Settings", href: "/admin/settings", icon: Settings2 },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -108,10 +113,13 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
       </nav>
 
       <div className="p-4 border-t border-border space-y-2">
-        <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-          <Settings className="w-5 h-5" />
-          Settings
-        </Link>
+        <div className="flex items-center justify-between mb-2">
+          <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors flex-1">
+            <Settings className="w-5 h-5" />
+            Settings
+          </Link>
+          <ThemeToggle />
+        </div>
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 px-3 py-2 rounded-xl text-sm font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
