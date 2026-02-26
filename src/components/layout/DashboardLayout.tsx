@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/api/profile";
 import { authService } from "@/api/auth";
 import { Link, useNavigate } from "react-router-dom";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -64,6 +65,9 @@ const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProp
             </div>
 
             <div className="flex items-center gap-2 md:gap-4">
+              <div className="lg:hidden">
+                <ThemeToggle />
+              </div>
               <Button variant="ghost" size="icon" className="rounded-full relative">
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-background" />
