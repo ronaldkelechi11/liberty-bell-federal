@@ -30,6 +30,8 @@ import UserAccounts from "./pages/admin/UserAccounts";
 import PaymentMethods from "./pages/admin/PaymentMethods";
 import AdminTransactions from "./pages/admin/Transactions";
 import AdminSettings from "./pages/admin/Settings";
+import AdminInvestments from "./pages/admin/Investments";
+import AdminNotifications from "./pages/admin/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +68,8 @@ const App = () => (
           <Route path="/admin/accounts" element={<UserAccounts />} />
           <Route path="/admin/transactions" element={<AdminTransactions />} />
           <Route path="/admin/payment-methods" element={<PaymentMethods />} />
+          <Route path="/admin/investments" element={<AdminInvestments />} />
+          <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
