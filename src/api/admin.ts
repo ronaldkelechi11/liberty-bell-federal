@@ -1,5 +1,5 @@
 import { axiosAuthenticatedInstance } from './client';
-import { User, Account, Investment, Notification, AnalyticsOverview, CreateTransferPinDto, AdminCreditDebitDto, UpdateLimitDto } from './types';
+import { User, Account, Investment, Notification, AnalyticsOverview, CreateTransferPinDto, AdminCreditDebitDto, UpdateLimitDto, Transaction } from './types';
 
 export const adminService = {
   updateUserTransferPin: (userId: string, data: CreateTransferPinDto) =>
@@ -24,4 +24,6 @@ export const adminService = {
 
   getAllNotifications: () => axiosAuthenticatedInstance.get<Notification[]>('/notifications/admin/all'),
   getAnalyticsOverview: () => axiosAuthenticatedInstance.get<AnalyticsOverview>('/admin/analytics/overview'),
+  getUsers: () => axiosAuthenticatedInstance.get<User[]>('/admin/users'),
+  getTransactions: () => axiosAuthenticatedInstance.get<Transaction[]>('/admin/transactions'),
 };

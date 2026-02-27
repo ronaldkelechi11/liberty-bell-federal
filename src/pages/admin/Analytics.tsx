@@ -5,7 +5,8 @@ import {
   ArrowUpRight,
   TrendingUp,
   Activity,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import {
@@ -22,13 +23,40 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "@/api/admin";
 
 const Analytics = () => {
+  const { data: analytics, isLoading } = useQuery({
+    queryKey: ['admin-analytics'],
+    queryFn: () => adminService.getAnalyticsOverview(),
+  });
+
   const stats = [
-    { title: 'Total Users', value: '1,284', change: '+12%', icon: Users },
-    { title: 'Total Deposits', value: '$2.4M', change: '+18%', icon: ArrowDownLeft },
-    { title: 'Total Withdrawals', value: '$840K', change: '+5%', icon: ArrowUpRight },
-    { title: 'Active Investments', value: '432', change: '+24%', icon: TrendingUp },
+    {
+      title: 'Total Users',
+      value: analytics?.data.totalUsers?.toLocaleString() || '0',
+      change: '+12%',
+      icon: Users
+    },
+    {
+      title: 'Total Deposits',
+      value: `$${(analytics?.data.totalDeposits || 0).toLocaleString()}`,
+      change: '+18%',
+      icon: ArrowDownLeft
+    },
+    {
+      title: 'Total Withdrawals',
+      value: `$${(analytics?.data.totalWithdrawals || 0).toLocaleString()}`,
+      change: '+5%',
+      icon: ArrowUpRight
+    },
+    {
+      title: 'Active Investments',
+      value: analytics?.data.totalInvestments?.toLocaleString() || '0',
+      change: '+24%',
+      icon: TrendingUp
+    },
   ];
 
   const chartData = [
@@ -41,31 +69,46 @@ const Analytics = () => {
   ];
 
   const pieData = [
-    { name: 'Active', value: 85, color: 'hsl(var(--primary))' },
+    { name: 'Active', value: analytics?.data.activeAccounts || 0, color: 'hsl(var(--primary))' },
     { name: 'Inactive', value: 10, color: 'hsl(var(--muted))' },
     { name: 'Suspended', value: 5, color: '#ef4444' },
   ];
 
+  if (isLoading) {
+    return (
+      <DashboardLayout isAdmin={true}>
+        <div className="flex items-center justify-center h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout isAdmin={true}>
-      <div className="space-y-8">
+      <div className="space-y-8 animate-in fade-in duration-500">
         <div>
-          <h1 className="text-2xl font-heading font-bold">Admin Analytics</h1>
-          <p className="text-muted-foreground">Overview of the system's performance and growth.</p>
+          <h1 className="text-3xl font-heading font-bold">Admin Analytics</h1>
+          <p className="text-muted-foreground mt-1">Real-time overview of the platform's performance.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((s) => (
-            <Card key={s.title}>
+            <Card key={s.title} className="border-none shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{s.title}</CardTitle>
-                <s.icon className="w-4 h-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{s.title}</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <s.icon className="w-4 h-4 text-primary" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{s.value}</div>
-                <p className={`text-xs mt-1 ${s.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                  {s.change} from last month
-                </p>
+                <div className="text-3xl font-bold tracking-tight">{s.value}</div>
+                <div className="flex items-center gap-1 mt-2">
+                  <span className={`text-xs font-bold ${s.change.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    {s.change}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">vs last month</span>
+                </div>
               </CardContent>
             </Card>
           ))}
