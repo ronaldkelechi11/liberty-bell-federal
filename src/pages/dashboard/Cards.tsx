@@ -3,20 +3,33 @@ import { Button } from "@/components/ui/button";
 import { CreditCard, Plus, MoreHorizontal, ShieldCheck, Zap, Lock } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cardService } from "@/api/cards";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CreateVirtualCardModal from "@/components/dashboard/CreateVirtualCardModal";
 import { toast } from "sonner";
+import { Card as CardType } from "@/api/types";
 
 const Cards = () => {
-  const queryClient = useQueryClient();
   const [isVirtualModalOpen, setIsVirtualModalOpen] = useState(false);
-  const { data: cards = [], isLoading } = useQuery({
-    queryKey: ['cards'],
-    queryFn: () => cardService.getCards(),
-  });
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchCards = async () => {
+    setIsLoading(true);
+    try {
+      const response = await cardService.getCards();
+      setCards(response.data || []);
+    } catch (error) {
+      console.error("Error fetching cards:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -91,7 +104,7 @@ const Cards = () => {
                         try {
                           await cardService.updateCard(card.id, { status: card.status === 'active' ? 'frozen' : 'active' });
                           toast.success(`Card ${card.status === 'active' ? 'frozen' : 'activated'} successfully`);
-                          queryClient.invalidateQueries({ queryKey: ['cards'] });
+                          fetchCards();
                         } catch (error: any) {
                           toast.error(error.message || "Action failed");
                         }
@@ -184,7 +197,10 @@ const Cards = () => {
 
       <CreateVirtualCardModal
         isOpen={isVirtualModalOpen}
-        onOpenChange={setIsVirtualModalOpen}
+        onOpenChange={(open) => {
+          setIsVirtualModalOpen(open);
+          if (!open) fetchCards();
+        }}
       />
     </DashboardLayout>
   );

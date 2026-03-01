@@ -123,6 +123,7 @@ export interface ExternalTransferDto {
   amount: number;
   description: string;
   otp: string;
+  transferPin: string;
 }
 
 export interface AdminCreditDebitDto {

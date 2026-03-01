@@ -1,8 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import SetupWizard from "../auth/SetupWizard";
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,18 +13,18 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/api/profile";
 import { authService } from "@/api/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../ui/theme-toggle";
+import { User } from "@/api/types";
 
 const DEFAULT_ADMIN = {
   firstname: 'Admin',
   lastname: 'User',
   email: 'admin@example.com',
   role: 'admin',
-};
+} as any;
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -34,12 +34,22 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, isAdmin: isAdminProp, profile: profileProp }: DashboardLayoutProps) => {
   const navigate = useNavigate();
-  const { data: profile } = useQuery({
-    queryKey: ['profile'],
-    queryFn: () => profileService.getProfile(),
-    throwOnError: false,
-    enabled: !profileProp && !isAdminProp,
-  });
+  const [profile, setProfile] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!profileProp && !isAdminProp) {
+        try {
+          const response = await profileService.getProfile();
+          setProfile(response.data);
+        } catch (error) {
+          console.error("Error fetching profile in layout:", error);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [profileProp, isAdminProp]);
 
   const currentProfile = isAdminProp ? DEFAULT_ADMIN : (profileProp || profile);
   const isAdmin = isAdminProp ?? currentProfile?.role === 'admin';

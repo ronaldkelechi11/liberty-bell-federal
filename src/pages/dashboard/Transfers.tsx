@@ -7,27 +7,66 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Building2, User2, ArrowRightCircle, Check } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
+import { profileService } from "@/api/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { Account, User } from "@/api/types";
 
 const Transfers = () => {
-  const queryClient = useQueryClient();
-
   const [amount, setAmount] = useState("");
   const [fromAccountId, setFromAccountId] = useState("");
   const [toAccountId, setToAccountId] = useState("");
   const [externalFromAccountId, setExternalFromAccountId] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientAccountNumber, setRecipientAccountNumber] = useState("");
+  const [recipientRoutingNumber, setRecipientRoutingNumber] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [transferPin, setTransferPin] = useState("");
   const [transferDescription, setTransferDescription] = useState("");
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { data: rawAccounts = [], isLoading } = useQuery({
-    queryKey: ["accounts"],
-    queryFn: () => accountService.getMyAccounts(),
-  });
+  const [rawAccounts, setRawAccounts] = useState<Account[]>([]);
+  const [profile, setProfile] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [accountsRes, profileRes] = await Promise.all([
+        accountService.getMyAccounts(),
+        profileService.getProfile()
+      ]);
+      setRawAccounts(accountsRes.data || []);
+      setProfile(profileRes.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchAccounts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await accountService.getMyAccounts();
+      setRawAccounts(response.data || []);
+    } catch (error) {
+      console.error("Error fetching accounts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
 
   const accounts = useMemo(() => {
     return rawAccounts.map((acc: any) => ({
@@ -191,7 +230,7 @@ const Transfers = () => {
                       });
 
                       toast.success("Transfer successful");
-                      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+                      fetchAccounts();
 
                       setAmount("");
                       setTransferDescription("");
@@ -226,6 +265,44 @@ const Transfers = () => {
                   {renderAccountCards(externalFromAccountId, setExternalFromAccountId)}
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Recipient Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      value={recipientName}
+                      onChange={(e) => setRecipientName(e.target.value)}
+                      placeholder="Full Name"
+                    />
+                  </div>
+                  <div>
+                    <Label>Bank Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      placeholder="e.g. Chase Bank"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Recipient Account Number <span className="text-red-500">*</span></Label>
+                    <Input
+                      value={recipientAccountNumber}
+                      onChange={(e) => setRecipientAccountNumber(e.target.value)}
+                      placeholder="Account Number"
+                    />
+                  </div>
+                  <div>
+                    <Label>Routing Number <span className="text-red-500">*</span></Label>
+                    <Input
+                      value={recipientRoutingNumber}
+                      onChange={(e) => setRecipientRoutingNumber(e.target.value)}
+                      placeholder="9-digit Routing Number"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <Label>Amount <span className="text-red-500">*</span> </Label>
                   <Input
@@ -243,50 +320,82 @@ const Transfers = () => {
                     value={transferDescription}
                     onChange={(e) => setTransferDescription(e.target.value)}
                     placeholder="Add a note for this transfer"
-                    rows={3}
+                    rows={2}
                   />
                 </div>
 
-                {showOtp && (
-                  <Input
-                    placeholder="Enter 6-digit OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    maxLength={6}
-                  />
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Transfer PIN <span className="text-red-500">*</span></Label>
+                    <Input
+                      type="password"
+                      placeholder="••••"
+                      maxLength={4}
+                      value={transferPin}
+                      onChange={(e) => setTransferPin(e.target.value)}
+                      className="text-center tracking-widest font-bold"
+                    />
+                  </div>
+                  {showOtp && (
+                    <div className="space-y-2">
+                      <Label>OTP Code <span className="text-red-500">*</span></Label>
+                      <Input
+                        placeholder="000000"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        maxLength={6}
+                        className="text-center tracking-widest font-bold"
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <Button
-                  className="w-full"
+                  className="w-full h-12 rounded-xl text-lg font-bold"
                   loading={isProcessing}
                   onClick={async () => {
-                    if (!externalFromAccountId || !amount) {
-                      toast.error("Select account and enter amount");
+                    if (!externalFromAccountId || !amount || !recipientName || !recipientAccountNumber || !recipientRoutingNumber || !bankName || !transferPin) {
+                      toast.error("Please fill all required fields");
                       return;
                     }
 
                     if (!showOtp) {
                       setShowOtp(true);
-                      toast.success("OTP sent");
+                      toast.success("OTP sent to your email");
+                      return;
+                    }
+
+                    if (!otp) {
+                      toast.error("Please enter the OTP code");
                       return;
                     }
 
                     setIsProcessing(true);
                     try {
                       await accountService.externalTransfer({
-                        fromAccountId: externalFromAccountId,
+                        fromAccountId: profile?.id || externalFromAccountId, // Following requirement: fromAccountId is logged in user id
+                        recipientName,
+                        recipientAccountNumber,
+                        recipientRoutingNumber,
+                        bankName,
                         amount: parseFloat(amount),
                         description: transferDescription,
                         otp,
+                        transferPin
                       });
 
-                      toast.success("Transfer submitted");
-                      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+                      toast.success("External transfer submitted successfully");
+                      fetchData();
 
                       setAmount("");
                       setTransferDescription("");
                       setOtp("");
                       setShowOtp(false);
+                      setRecipientName("");
+                      setRecipientAccountNumber("");
+                      setRecipientRoutingNumber("");
+                      setBankName("");
+                      setTransferPin("");
                     } catch (err: any) {
                       toast.error(err.message || "Transfer failed");
                     } finally {

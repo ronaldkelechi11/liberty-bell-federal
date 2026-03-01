@@ -2,16 +2,29 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, CreditCard, Trash2, Edit2, ShieldCheck, Banknote, Loader2, Coins } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useQuery } from "@tanstack/react-query";
 import { paymentMethodService } from "@/api/payment-methods";
+import { useState, useEffect } from "react";
+import { PaymentMethod } from "@/api/types";
 
 const PaymentMethods = () => {
-  const { data: methodsResponse, isLoading } = useQuery({
-    queryKey: ['admin-payment-methods'],
-    queryFn: () => paymentMethodService.getAll(),
-  });
+  const [methods, setMethods] = useState<PaymentMethod[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const methods = methodsResponse?.data || [];
+  const fetchMethods = async () => {
+    setIsLoading(true);
+    try {
+      const response = await paymentMethodService.getAll();
+      setMethods(response.data || []);
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMethods();
+  }, []);
 
   return (
     <DashboardLayout isAdmin={true}>

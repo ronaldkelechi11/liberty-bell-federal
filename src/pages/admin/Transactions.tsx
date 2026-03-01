@@ -13,7 +13,8 @@ import {
   Clock,
   XCircle,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Activity
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
@@ -23,21 +24,34 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { adminService } from "@/api/admin";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Transaction } from "@/api/types";
 
 const AdminTransactions = () => {
-  const { data: transactionsResponse, isLoading } = useQuery({
-    queryKey: ['admin-transactions'],
-    queryFn: () => adminService.getTransactions(),
-  });
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const transactions = transactionsResponse?.data || [];
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setIsLoading(true);
+      try {
+        const response = await adminService.getTransactions();
+        setTransactions(response.data || []);
+      } catch (error) {
+        console.error("Error fetching admin transactions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   const getStatusBadge = (status: string) => {
-    const s = status.toLowerCase();
+    const s = (status || '').toLowerCase();
     switch (s) {
       case 'completed':
         return <Badge variant="default" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 gap-1 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800"><CheckCircle2 className="w-3 h-3" /> {status}</Badge>;
@@ -162,13 +176,13 @@ const AdminTransactions = () => {
                           <td className="px-6 py-4">
                             <p className="font-mono text-[10px] font-bold text-foreground">REF-{t.reference?.slice(0, 8).toUpperCase()}</p>
                             <p className="text-[10px] text-muted-foreground mt-0.5">
-                              {format(new Date(t.createdAt), 'MMM dd, yyyy • HH:mm')}
+                              {t.createdAt ? format(new Date(t.createdAt), 'MMM dd, yyyy • HH:mm') : 'N/A'}
                             </p>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2 group/id">
                               <span className="font-mono text-xs text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded">
-                                {t.accountId.slice(0, 8)}...
+                                {t.accountId?.slice(0, 8)}...
                               </span>
                               <ExternalLink className="w-3 h-3 text-muted-foreground opacity-0 group-hover/id:opacity-100 transition-opacity cursor-pointer" />
                             </div>
@@ -223,20 +237,3 @@ const AdminTransactions = () => {
 };
 
 export default AdminTransactions;
-
-const Activity = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-  </svg>
-);
