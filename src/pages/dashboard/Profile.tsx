@@ -45,7 +45,7 @@ const Profile = () => {
   );
 
   return (
-    <DashboardLayout>
+    <DashboardLayout profile={user}>
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
           <h1 className="text-2xl font-heading font-bold">Profile Settings</h1>

@@ -37,22 +37,28 @@ const SetupWizard = () => {
         let storedUser = null;
         try {
           const userString = localStorage.getItem('user');
-          storedUser = userString ? JSON.parse(userString) : null;
-        } catch (parseError) {
-          console.error("Failed to parse stored user", parseError);
-          localStorage.removeItem('user');
+          if (userString) {
+            try {
+              storedUser = JSON.parse(userString);
+            } catch (parseError) {
+              console.error("Failed to parse stored user", parseError);
+              localStorage.removeItem('user');
+            }
+          }
+        } catch (error) {
+          console.error("Failed to access localStorage", error);
         }
 
-        if (storedUser?.role === 'admin') return;
+        // Don't fetch if admin or no stored user
+        if (storedUser?.role === 'admin' || !storedUser) return;
 
         const userData = await profileService.getProfile();
         setUser(userData);
 
         if (userData?.role === 'admin') return;
 
-
         // Check if setup is needed - Only show if transfer PIN is not set
-        if (userData.transferPin == "0000") {
+        if (userData.transferPin === "0000") {
           setIsOpen(true);
           if (userData.profilePicture) {
             setStep(2); // Skip to PIN setup if picture is already there
@@ -62,6 +68,7 @@ const SetupWizard = () => {
         }
       } catch (error) {
         console.error("Failed to fetch user profile", error);
+        // Don't show setup wizard if profile fetch fails
       }
     };
 

@@ -7,7 +7,7 @@ export const adminService = {
 
   getAccounts: (params?: { status?: string; type?: string; userId?: string }) => {
     const query = new URLSearchParams(params as any).toString();
-    return axiosAuthenticatedInstance.get<Account[]>(`/admin/accounts?${query}`);
+    return axiosAuthenticatedInstance.get<Account[]>(`/admin/users`);
   },
   getAccount: (id: string) => axiosAuthenticatedInstance.get<Account>(`/admin/accounts/${id}`),
   requestCreditOtp: (id: string) => axiosAuthenticatedInstance.post<{ message: string }>(`/admin/accounts/${id}/credit-otp`),

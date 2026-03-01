@@ -19,20 +19,30 @@ import { authService } from "@/api/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../ui/theme-toggle";
 
+const DEFAULT_ADMIN = {
+  firstname: 'Admin',
+  lastname: 'User',
+  email: 'admin@example.com',
+  role: 'admin',
+};
+
 interface DashboardLayoutProps {
   children: ReactNode;
   isAdmin?: boolean;
+  profile?: any;
 }
 
-const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, isAdmin: isAdminProp, profile: profileProp }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const { data: profile } = useQuery({
     queryKey: ['profile'],
     queryFn: () => profileService.getProfile(),
     throwOnError: false,
+    enabled: !profileProp && !isAdminProp,
   });
 
-  const isAdmin = isAdminProp ?? profile?.role === 'admin';
+  const currentProfile = isAdminProp ? DEFAULT_ADMIN : (profileProp || profile);
+  const isAdmin = isAdminProp ?? currentProfile?.role === 'admin';
 
   const handleLogout = () => {
     authService.logout();
@@ -77,10 +87,10 @@ const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProp
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={profile?.profilePicture} alt="User" />
+                      <AvatarImage src={currentProfile?.profilePicture} alt="User" />
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {profile?.firstname || profile?.lastname
-                          ? `${profile?.firstname?.[0] ?? ''}${profile?.lastname?.[0] ?? ''}`
+                        {currentProfile?.firstname || currentProfile?.lastname
+                          ? `${currentProfile?.firstname?.[0] ?? ''}${currentProfile?.lastname?.[0] ?? ''}`
                           : 'U'}
                       </AvatarFallback>
                     </Avatar>
@@ -90,10 +100,10 @@ const DashboardLayout = ({ children, isAdmin: isAdminProp }: DashboardLayoutProp
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {profile ? `${profile.firstname || ''} ${profile.lastname || ''}`.trim() || 'User' : 'User'}
+                        {currentProfile ? `${currentProfile.firstname || ''} ${currentProfile.lastname || ''}`.trim() || 'User' : 'User'}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {profile?.email || 'user@example.com'}
+                        {currentProfile?.email || 'user@example.com'}
                       </p>
                     </div>
                   </DropdownMenuLabel>

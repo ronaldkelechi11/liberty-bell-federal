@@ -24,7 +24,21 @@ import {
   Cell
 } from 'recharts';
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { adminService } from "@/api/admin";
+
+const getRandomValue = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const generateChartData = () => {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  return months.map((month) => ({
+    name: month,
+    deposits: getRandomValue(1500, 5000),
+    withdrawals: getRandomValue(800, 4000),
+  }));
+};
 
 const Analytics = () => {
   const { data: analytics, isLoading } = useQuery({
@@ -32,44 +46,37 @@ const Analytics = () => {
     queryFn: () => adminService.getAnalyticsOverview(),
   });
 
+  const chartData = useMemo(() => generateChartData(), []);
+
   const stats = [
     {
       title: 'Total Users',
-      value: analytics?.data.totalUsers?.toLocaleString() || '0',
+      value: analytics?.totalUsers?.toLocaleString() || '0',
       change: '+12%',
       icon: Users
     },
     {
       title: 'Total Deposits',
-      value: `$${(analytics?.data.totalDeposits || 0).toLocaleString()}`,
+      value: `$${(analytics?.totalDeposits || 0).toLocaleString()}`,
       change: '+18%',
       icon: ArrowDownLeft
     },
     {
       title: 'Total Withdrawals',
-      value: `$${(analytics?.data.totalWithdrawals || 0).toLocaleString()}`,
+      value: `$${(analytics?.totalWithdrawals || 0).toLocaleString()}`,
       change: '+5%',
       icon: ArrowUpRight
     },
     {
       title: 'Active Investments',
-      value: analytics?.data.totalInvestments?.toLocaleString() || '0',
+      value: analytics?.totalInvestments?.toLocaleString() || '0',
       change: '+24%',
       icon: TrendingUp
     },
   ];
 
-  const chartData = [
-    { name: 'Jan', deposits: 4000, withdrawals: 2400 },
-    { name: 'Feb', deposits: 3000, withdrawals: 1398 },
-    { name: 'Mar', deposits: 2000, withdrawals: 9800 },
-    { name: 'Apr', deposits: 2780, withdrawals: 3908 },
-    { name: 'May', deposits: 1890, withdrawals: 4800 },
-    { name: 'Jun', deposits: 2390, withdrawals: 3800 },
-  ];
-
   const pieData = [
-    { name: 'Active', value: analytics?.data.activeAccounts || 0, color: 'hsl(var(--primary))' },
+    { name: 'Active', value: analytics?.activeAccounts || 0, color: 'hsl(var(--primary))' },
     { name: 'Inactive', value: 10, color: 'hsl(var(--muted))' },
     { name: 'Suspended', value: 5, color: '#ef4444' },
   ];
@@ -186,7 +193,7 @@ const Analytics = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm">
+          <Card className="border-none shadow-sm pb-4">
             <CardHeader>
               <CardTitle>User Status Distribution</CardTitle>
             </CardHeader>

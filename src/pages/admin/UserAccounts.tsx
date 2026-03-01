@@ -31,10 +31,11 @@ import { format } from "date-fns";
 const UserAccounts = () => {
   const { data: usersResponse, isLoading } = useQuery({
     queryKey: ['admin-users'],
-    queryFn: () => adminService.getUsers(),
+    queryFn: () => adminService.getAccounts(),
   });
 
   const users = usersResponse?.data || [];
+  console.log(users);
 
   return (
     <DashboardLayout isAdmin={true}>
@@ -45,9 +46,10 @@ const UserAccounts = () => {
             <p className="text-muted-foreground mt-1">Monitor users, manage accounts, and handle administrative actions.</p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="rounded-xl gap-2 border-slate-200 dark:border-slate-800">
+            {/* Todo: Add any other useful button to replace */}
+            {/* <Button variant="outline" className="rounded-xl gap-2 border-slate-200 dark:border-slate-800">
               <Mail className="w-4 h-4" /> Message All
-            </Button>
+            </Button> */}
             <Button className="rounded-xl gap-2 bg-primary hover:bg-primary/90">
               <User className="w-4 h-4" /> Create User
             </Button>
