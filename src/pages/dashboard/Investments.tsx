@@ -3,12 +3,11 @@ import { Button } from "@/components/ui/button";
 import { TrendingUp, Plus, ArrowUpRight, Clock, ShieldCheck, ChevronRight, BarChart3, PieChart } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
 import { investmentService } from "@/api/investments";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import InvestNowModal from "@/components/dashboard/InvestNowModal";
-import { InvestmentPlan } from "@/api/types";
+import { InvestmentPlan, Investment } from "@/api/types";
 import {
   AreaChart,
   Area,
@@ -43,6 +42,24 @@ const stockData = [
 const Investments = () => {
   const [isInvestModalOpen, setIsInvestModalOpen] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<InvestmentPlan>('starter');
+  const [myInvestments, setMyInvestments] = useState<Investment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchInvestments = async () => {
+    setIsLoading(true);
+    try {
+      const response = await investmentService.getMyInvestments();
+      setMyInvestments(response.data || []);
+    } catch (error) {
+      console.error("Error fetching investments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInvestments();
+  }, []);
 
   const plans = [
     { id: 'starter' as InvestmentPlan, name: 'Starter Plan', roi: '8.5%', term: '6 Months', min: 500, description: 'Low risk, steady growth for beginners.' },
@@ -54,11 +71,6 @@ const Investments = () => {
     setSelectedPlanId(planId);
     setIsInvestModalOpen(true);
   };
-
-  const { data: myInvestments = [], isLoading } = useQuery({
-    queryKey: ['investments'],
-    queryFn: () => investmentService.getMyInvestments(),
-  });
 
   const totalInvested = myInvestments.reduce((acc, curr) => acc + curr.amount, 0);
   const totalProfit = myInvestments.reduce((acc, curr) => acc + (curr.expectedReturns || 0), 0);
@@ -290,7 +302,10 @@ const Investments = () => {
 
       <InvestNowModal
         isOpen={isInvestModalOpen}
-        onOpenChange={setIsInvestModalOpen}
+        onOpenChange={(open) => {
+          setIsInvestModalOpen(open);
+          if (!open) fetchInvestments();
+        }}
         initialPlanId={selectedPlanId}
       />
     </DashboardLayout>

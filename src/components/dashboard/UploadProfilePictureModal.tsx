@@ -9,10 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { profileService } from "@/api/profile";
 import { useToast } from "@/components/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Upload, Loader2 } from "lucide-react";
 
 interface UploadProfilePictureModalProps {
@@ -23,28 +21,29 @@ interface UploadProfilePictureModalProps {
 const UploadProfilePictureModal = ({ isOpen, onOpenChange }: UploadProfilePictureModalProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
+    const [isPending, setIsPending] = useState(false);
     const { toast } = useToast();
-    const queryClient = useQueryClient();
 
-    const uploadMutation = useMutation({
-        mutationFn: (file: File) => profileService.uploadProfilePicture(file),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['profile'] });
+    const handleUpload = async (file: File) => {
+        setIsPending(true);
+        try {
+            await profileService.uploadProfilePicture(file);
             toast({
                 title: "Success",
                 description: "Profile picture updated successfully.",
             });
             onOpenChange(false);
             resetForm();
-        },
-        onError: (error: any) => {
+        } catch (error: any) {
             toast({
                 title: "Error",
                 description: error.message || "Failed to upload profile picture",
                 variant: "destructive",
             });
+        } finally {
+            setIsPending(false);
         }
-    });
+    };
 
     const resetForm = () => {
         setSelectedFile(null);
@@ -73,9 +72,7 @@ const UploadProfilePictureModal = ({ isOpen, onOpenChange }: UploadProfilePictur
             });
             return;
         }
-        console.log(selectedFile);
-
-        uploadMutation.mutate(selectedFile);
+        handleUpload(selectedFile);
     };
 
     return (
@@ -133,9 +130,9 @@ const UploadProfilePictureModal = ({ isOpen, onOpenChange }: UploadProfilePictur
                         <Button
                             type="submit"
                             className="rounded-xl"
-                            disabled={uploadMutation.isPending || !selectedFile}
+                            disabled={isPending || !selectedFile}
                         >
-                            {uploadMutation.isPending ? (
+                            {isPending ? (
                                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
                             ) : null}
                             Upload Picture

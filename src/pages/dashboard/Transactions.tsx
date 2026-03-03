@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
 import { accountService } from "@/api/accounts";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,16 +24,24 @@ const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["transactions"],
-    queryFn: () => accountService.getAllTransactions(),
-    retry: false,
-    throwOnError: false,
-  });
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setIsLoading(true);
+      try {
+        const response = await accountService.getAllTransactions();
+        setTransactions(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // ✅ Ensure transactions is always an array
-  const transactions: Transaction[] = Array.isArray(data) ? data : [];
+    fetchTransactions();
+  }, []);
 
   // ✅ Safe filtering with null checks
   const filteredTransactions = useMemo(() => {

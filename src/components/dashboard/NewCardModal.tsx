@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cardService } from "@/api/cards";
 import { useToast } from "@/components/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
@@ -25,46 +24,49 @@ const NewCardModal = ({ isOpen, onOpenChange }: NewCardModalProps) => {
     const [cardType, setCardType] = useState<string>('debit');
     const [otp, setOtp] = useState("");
     const [showOtp, setShowOtp] = useState(false);
+    const [isPending, setIsPending] = useState(false);
     const { toast } = useToast();
-    const queryClient = useQueryClient();
 
-    const requestOtpMutation = useMutation({
-        mutationFn: () => cardService.requestOtp(),
-        onSuccess: () => {
+    const handleRequestOtp = async () => {
+        setIsPending(true);
+        try {
+            await cardService.requestOtp();
             setShowOtp(true);
             toast({
                 title: "OTP Sent",
                 description: "Please check your email/phone for the verification code.",
             });
-        },
-        onError: (error: any) => {
+        } catch (error: any) {
             toast({
                 title: "Error",
                 description: error.message || "Failed to request OTP",
                 variant: "destructive",
             });
+        } finally {
+            setIsPending(false);
         }
-    });
+    };
 
-    const createCardMutation = useMutation({
-        mutationFn: () => cardService.createCard({ cardType: cardType, otp }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+    const handleCreateCard = async () => {
+        setIsPending(true);
+        try {
+            await cardService.createCard({ cardType: cardType, otp });
             toast({
                 title: "Success",
                 description: `Your new ${cardType} card has been created successfully.`,
             });
             onOpenChange(false);
             resetForm();
-        },
-        onError: (error: any) => {
+        } catch (error: any) {
             toast({
                 title: "Error",
                 description: error.message || "Failed to create card",
                 variant: "destructive",
             });
+        } finally {
+            setIsPending(false);
         }
-    });
+    };
 
     const resetForm = () => {
         setCardType('debit');
@@ -75,9 +77,9 @@ const NewCardModal = ({ isOpen, onOpenChange }: NewCardModalProps) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!showOtp) {
-            requestOtpMutation.mutate();
+            handleRequestOtp();
         } else {
-            createCardMutation.mutate();
+            handleCreateCard();
         }
     };
 
@@ -130,11 +132,11 @@ const NewCardModal = ({ isOpen, onOpenChange }: NewCardModalProps) => {
                         <Button
                             type="submit"
                             className="w-full h-12 rounded-xl text-lg font-bold"
-                            disabled={requestOtpMutation.isPending || createCardMutation.isPending}
+                            disabled={isPending}
                         >
-                            {requestOtpMutation.isPending || createCardMutation.isPending ? (
+                            {isPending && (
                                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                            ) : null}
+                            )}
                             {!showOtp ? "Next" : "Add Card"}
                         </Button>
                     </DialogFooter>

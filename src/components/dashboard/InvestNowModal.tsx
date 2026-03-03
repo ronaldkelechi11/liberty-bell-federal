@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Dialog,
     DialogContent,
@@ -13,10 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { investmentService } from "@/api/investments";
 import { accountService } from "@/api/accounts";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, TrendingUp, Info } from "lucide-react";
-import { InvestmentPlan } from "@/api/types";
+import { InvestmentPlan, Account } from "@/api/types";
 
 interface InvestNowModalProps {
     isOpen: boolean;
@@ -30,43 +29,55 @@ const InvestNowModal = ({ isOpen, onOpenChange, initialPlanId }: InvestNowModalP
     const [accountId, setAccountId] = useState("");
     const [otp, setOtp] = useState("");
     const [showOtp, setShowOtp] = useState(false);
-    const queryClient = useQueryClient();
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [isPending, setIsPending] = useState(false);
 
-    const { data: accounts = [] } = useQuery({
-        queryKey: ['accounts'],
-        queryFn: () => accountService.getMyAccounts(),
-        enabled: isOpen,
-    });
+    useEffect(() => {
+        const fetchAccounts = async () => {
+            if (isOpen) {
+                try {
+                    const response = await accountService.getMyAccounts();
+                    setAccounts(response.data || []);
+                } catch (error) {
+                    console.error("Error fetching accounts in modal:", error);
+                }
+            }
+        };
 
-    const requestOtpMutation = useMutation({
-        mutationFn: () => investmentService.requestOtp(),
-        onSuccess: () => {
+        fetchAccounts();
+    }, [isOpen]);
+
+    const handleRequestOtp = async () => {
+        setIsPending(true);
+        try {
+            await investmentService.requestOtp();
             setShowOtp(true);
             toast.success("OTP sent to your email");
-        },
-        onError: (error: any) => {
+        } catch (error: any) {
             toast.error(error.message || "Failed to request OTP");
+        } finally {
+            setIsPending(false);
         }
-    });
+    };
 
-    const createInvestmentMutation = useMutation({
-        mutationFn: () => investmentService.createInvestment({
-            planId,
-            amount: parseFloat(amount),
-            accountId,
-            otp
-        }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['investments'] });
-            queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    const handleCreateInvestment = async () => {
+        setIsPending(true);
+        try {
+            await investmentService.createInvestment({
+                planId,
+                amount: parseFloat(amount),
+                accountId,
+                otp
+            });
             toast.success("Investment successful!");
             onOpenChange(false);
             resetForm();
-        },
-        onError: (error: any) => {
+        } catch (error: any) {
             toast.error(error.message || "Investment failed");
+        } finally {
+            setIsPending(false);
         }
-    });
+    };
 
     const resetForm = () => {
         setAmount("");
@@ -82,13 +93,13 @@ const InvestNowModal = ({ isOpen, onOpenChange, initialPlanId }: InvestNowModalP
             return;
         }
         if (!showOtp) {
-            requestOtpMutation.mutate();
+            handleRequestOtp();
         } else {
             if (!otp) {
                 toast.error("Please enter OTP");
                 return;
             }
-            createInvestmentMutation.mutate();
+            handleCreateInvestment();
         }
     };
 
@@ -195,11 +206,11 @@ const InvestNowModal = ({ isOpen, onOpenChange, initialPlanId }: InvestNowModalP
                         <Button
                             type="submit"
                             className="w-full h-12 rounded-xl text-lg font-bold"
-                            disabled={requestOtpMutation.isPending || createInvestmentMutation.isPending}
+                            disabled={isPending}
                         >
-                            {requestOtpMutation.isPending || createInvestmentMutation.isPending ? (
+                            {isPending && (
                                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                            ) : null}
+                            )}
                             {!showOtp ? "Proceed to Invest" : "Confirm Investment"}
                         </Button>
                     </DialogFooter>

@@ -2,16 +2,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bell, CheckCircle2, AlertCircle, Info, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
 import { notificationService } from "@/api/notifications";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
+import { Notification } from "@/api/types";
 
 const Notifications = () => {
-  const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => notificationService.getMyNotifications(),
-  });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setIsLoading(true);
+      try {
+        const response = await notificationService.getMyNotifications();
+        setNotifications(response.data || []);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   const getIcon = (type: string) => {
     switch (type) {

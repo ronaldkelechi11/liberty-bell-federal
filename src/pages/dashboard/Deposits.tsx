@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Wallet, CreditCard, Banknote, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowDownLeft, Loader2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useQuery } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
 import { paymentMethodService } from "@/api/payment-methods";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import PaymentMethodModal from "@/components/dashboard/PaymentMethodModal";
-import { PaymentMethod } from "@/api/types";
+import { PaymentMethod, Account } from "@/api/types";
 
 const accountDepositInfo = [
     {
@@ -53,18 +52,39 @@ const accountDepositInfo = [
 const Deposits = () => {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+    const [accountsLoading, setAccountsLoading] = useState(true);
+    const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(true);
 
-    const { data: accounts = [], isLoading: accountsLoading } = useQuery({
-        queryKey: ["accounts"],
-        queryFn: () => accountService.getMyAccounts(),
-        throwOnError: false,
-    });
+    useEffect(() => {
+        const fetchAccounts = async () => {
+            setAccountsLoading(true);
+            try {
+                const response = await accountService.getMyAccounts();
+                setAccounts(response.data || []);
+            } catch (error) {
+                console.error("Error fetching accounts:", error);
+            } finally {
+                setAccountsLoading(false);
+            }
+        };
 
-    const { data: paymentMethods = [], isLoading: paymentMethodsLoading } = useQuery({
-        queryKey: ["payment-methods"],
-        queryFn: () => paymentMethodService.getAll(),
-        throwOnError: false,
-    });
+        const fetchPaymentMethods = async () => {
+            setPaymentMethodsLoading(true);
+            try {
+                const response = await paymentMethodService.getAll();
+                setPaymentMethods(response.data || []);
+            } catch (error) {
+                console.error("Error fetching payment methods:", error);
+            } finally {
+                setPaymentMethodsLoading(false);
+            }
+        };
+
+        fetchAccounts();
+        fetchPaymentMethods();
+    }, []);
 
     const handlePaymentMethodClick = (method: PaymentMethod) => {
         setSelectedPaymentMethod(method);

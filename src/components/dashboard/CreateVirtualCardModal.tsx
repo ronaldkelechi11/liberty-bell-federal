@@ -5,13 +5,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cardService } from "@/api/cards";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Zap, ShieldCheck, CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -24,31 +22,34 @@ interface CreateVirtualCardModalProps {
 const CreateVirtualCardModal = ({ isOpen, onOpenChange }: CreateVirtualCardModalProps) => {
     const [otp, setOtp] = useState("");
     const [showOtp, setShowOtp] = useState(false);
-    const queryClient = useQueryClient();
+    const [isPending, setIsPending] = useState(false);
 
-    const requestOtpMutation = useMutation({
-        mutationFn: () => cardService.requestOtp(),
-        onSuccess: () => {
+    const handleRequestOtp = async () => {
+        setIsPending(true);
+        try {
+            await cardService.requestOtp();
             setShowOtp(true);
             toast.success("OTP sent to your email");
-        },
-        onError: (error: any) => {
+        } catch (error: any) {
             toast.error(error.message || "Failed to request OTP");
+        } finally {
+            setIsPending(false);
         }
-    });
+    };
 
-    const createCardMutation = useMutation({
-        mutationFn: () => cardService.createCard({ cardType: 'virtual', otp }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+    const handleCreateCard = async () => {
+        setIsPending(true);
+        try {
+            await cardService.createCard({ cardType: 'virtual', otp });
             toast.success("Virtual card created successfully!");
             onOpenChange(false);
             resetForm();
-        },
-        onError: (error: any) => {
+        } catch (error: any) {
             toast.error(error.message || "Failed to create card");
+        } finally {
+            setIsPending(false);
         }
-    });
+    };
 
     const resetForm = () => {
         setOtp("");
@@ -58,9 +59,9 @@ const CreateVirtualCardModal = ({ isOpen, onOpenChange }: CreateVirtualCardModal
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!showOtp) {
-            requestOtpMutation.mutate();
+            handleRequestOtp();
         } else {
-            createCardMutation.mutate();
+            handleCreateCard();
         }
     };
 
@@ -153,11 +154,11 @@ const CreateVirtualCardModal = ({ isOpen, onOpenChange }: CreateVirtualCardModal
                         <Button
                             type="submit"
                             className="w-full h-14 bg-amber-500 hover:bg-amber-600 text-zinc-950 rounded-2xl text-lg font-bold shadow-lg shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                            disabled={requestOtpMutation.isPending || createCardMutation.isPending}
+                            disabled={isPending}
                         >
-                            {requestOtpMutation.isPending || createCardMutation.isPending ? (
+                            {isPending && (
                                 <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                            ) : null}
+                            )}
                             {!showOtp ? "Generate Card" : "Confirm & Activate"}
                         </Button>
                     </form>

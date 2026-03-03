@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ArrowUpRight,
   ArrowDownLeft,
@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
 import { profileService } from "@/api/profile";
 import { cardService } from "@/api/cards";
@@ -21,7 +20,7 @@ import { Slider } from "@/components/ui/slider";
 import NewAccountModal from "@/components/dashboard/NewAccountModal";
 import NewCardModal from "@/components/dashboard/NewCardModal";
 import TransactionReceiptModal from "@/components/dashboard/TransactionReceiptModal";
-import { Transaction } from "@/api/types";
+import { Transaction, Account, User, Card as CardType } from "@/api/types";
 import { format } from "date-fns";
 
 const Overview = () => {
@@ -30,37 +29,50 @@ const Overview = () => {
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-  const { data: profile } = useQuery({
-    queryKey: ['profile'],
-    queryFn: () => profileService.getProfile(),
-    throwOnError: false,
-  });
 
-  const { data: accounts = [], isLoading: accountsLoading } = useQuery({
-    queryKey: ['accounts'],
-    queryFn: () => accountService.getMyAccounts(),
-    retry: false,
-    throwOnError: false,
-  });
+  const [profile, setProfile] = useState<User | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const { data: cards = [] } = useQuery({
-    queryKey: ['cards'],
-    queryFn: () => cardService.getCards(),
-    throwOnError: false,
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [accountsLoading, setAccountsLoading] = useState(true);
 
-  const { data: transactions = [] } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: () => accountService.getAllTransactions(),
-    retry: false,
-    throwOnError: false,
-  });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [profileRes, accountsRes, cardsRes, transactionsRes] = await Promise.all([
+          profileService.getProfile(),
+          accountService.getMyAccounts(),
+          cardService.getCards(),
+          accountService.getAllTransactions()
+        ]);
 
-  const totalBalance = Array.isArray(accounts) ? accounts.reduce((acc, curr) => acc + (curr.balance || 0), 0) : 0;
+        setProfile(profileRes.data);
+        setAccounts(accountsRes.data || []);
+        setCards(cardsRes.data || []);
+        setTransactions(transactionsRes.data || []);
+      } catch (error) {
+        console.error("Error fetching overview data:", error);
+      } finally {
+        setIsLoading(false);
+        setAccountsLoading(false);
+      }
+    };
 
-  const totalDailyLimit = Array.isArray(accounts) ? accounts.reduce((acc, curr) => acc + (curr.dailyLimit || 0), 0) : 0;
+    fetchData();
+  }, []);
 
-  const spentToday = Array.isArray(transactions) ? transactions
+  const totalBalance = useMemo(() =>
+    Array.isArray(accounts) ? accounts.reduce((acc, curr) => acc + (curr.balance || 0), 0) : 0,
+  [accounts]);
+
+  const totalDailyLimit = useMemo(() =>
+    Array.isArray(accounts) ? accounts.reduce((acc, curr) => acc + (curr.dailyLimit || 0), 0) : 0,
+  [accounts]);
+
+  const spentToday = useMemo(() =>
+    Array.isArray(transactions) ? transactions
     .filter(t => {
       if (!t || !t.createdAt) return false;
       try {
@@ -74,7 +86,8 @@ const Overview = () => {
         return false;
       }
     })
-    .reduce((acc, curr) => acc + Math.abs(curr.amount || 0), 0) : 0;
+    .reduce((acc, curr) => acc + Math.abs(curr.amount || 0), 0) : 0,
+  [transactions]);
 
   const remainingLimit = Math.max(0, (totalDailyLimit || 0) - (spentToday || 0));
   const limitUsagePercent = totalDailyLimit > 0 ? ((spentToday || 0) / totalDailyLimit) * 100 : 0;
@@ -89,7 +102,7 @@ const Overview = () => {
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-heading font-bold">
-            {profile ? `Hi, ${profile.firstname || 'User'}` : <Skeleton className="h-8 w-48" />}
+            {profile ? `Hi, ${profile.firstname || 'User'}` : isLoading ? <Skeleton className="h-8 w-48" /> : 'Hi, User'}
           </h1>
           <p className="text-muted-foreground">Here's what's happening with your money today.</p>
         </div>

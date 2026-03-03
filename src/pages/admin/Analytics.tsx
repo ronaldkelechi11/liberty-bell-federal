@@ -23,9 +23,9 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { adminService } from "@/api/admin";
+import { AnalyticsOverview } from "@/api/types";
 
 const getRandomValue = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -41,10 +41,24 @@ const generateChartData = () => {
 };
 
 const Analytics = () => {
-  const { data: analytics, isLoading } = useQuery({
-    queryKey: ['admin-analytics'],
-    queryFn: () => adminService.getAnalyticsOverview(),
-  });
+  const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      setIsLoading(true);
+      try {
+        const response = await adminService.getAnalyticsOverview();
+        setAnalytics(response.data);
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
 
   const chartData = useMemo(() => generateChartData(), []);
 

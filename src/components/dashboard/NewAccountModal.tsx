@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { accountService } from "@/api/accounts";
 import { AccountType } from "@/api/types";
 import { useToast } from "@/components/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
@@ -27,46 +26,49 @@ const NewAccountModal = ({ isOpen, onOpenChange }: NewAccountModalProps) => {
   const [currency, setCurrency] = useState('USD');
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const requestOtpMutation = useMutation({
-    mutationFn: () => accountService.requestOtp(),
-    onSuccess: () => {
+  const handleRequestOtp = async () => {
+    setIsPending(true);
+    try {
+      await accountService.requestOtp();
       setShowOtp(true);
       toast({
         title: "OTP Sent",
         description: "Please check your email/phone for the verification code.",
       });
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to request OTP",
         variant: "destructive",
       });
+    } finally {
+      setIsPending(false);
     }
-  });
+  };
 
-  const createAccountMutation = useMutation({
-    mutationFn: () => accountService.createAccount({ type, currency, otp }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+  const handleCreateAccount = async () => {
+    setIsPending(true);
+    try {
+      await accountService.createAccount({ type, currency, otp });
       toast({
         title: "Success",
         description: `Your new ${type} account has been created successfully.`,
       });
       onOpenChange(false);
       resetForm();
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to create account",
         variant: "destructive",
       });
+    } finally {
+      setIsPending(false);
     }
-  });
+  };
 
   const resetForm = () => {
     setType('checking');
@@ -78,9 +80,9 @@ const NewAccountModal = ({ isOpen, onOpenChange }: NewAccountModalProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!showOtp) {
-      requestOtpMutation.mutate();
+      handleRequestOtp();
     } else {
-      createAccountMutation.mutate();
+      handleCreateAccount();
     }
   };
 
@@ -149,11 +151,11 @@ const NewAccountModal = ({ isOpen, onOpenChange }: NewAccountModalProps) => {
             <Button
               type="submit"
               className="w-full h-12 rounded-xl text-lg font-bold"
-              disabled={requestOtpMutation.isPending || createAccountMutation.isPending}
+              disabled={isPending}
             >
-              {requestOtpMutation.isPending || createAccountMutation.isPending ? (
+              {isPending && (
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              ) : null}
+              )}
               {!showOtp ? "Next" : "Create Account"}
             </Button>
           </DialogFooter>

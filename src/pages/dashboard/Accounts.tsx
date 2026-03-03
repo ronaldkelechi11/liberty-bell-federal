@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Wallet, Plus, MoreVertical } from "lucide-react";
@@ -6,16 +6,30 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Link } from "react-router-dom";
 import NewAccountModal from "@/components/dashboard/NewAccountModal";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
 import { accountService } from "@/api/accounts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Account } from "@/api/types";
 
 const Accounts = () => {
   const [isNewAccountModalOpen, setIsNewAccountModalOpen] = useState(false);
-  const { data: accounts = [], isLoading } = useQuery({
-    queryKey: ['accounts'],
-    queryFn: () => accountService.getMyAccounts(),
-  });
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchAccounts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await accountService.getMyAccounts();
+      setAccounts(response.data || []);
+    } catch (error) {
+      console.error("Error fetching accounts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -102,7 +116,10 @@ const Accounts = () => {
       </div>
       <NewAccountModal
         isOpen={isNewAccountModalOpen}
-        onOpenChange={setIsNewAccountModalOpen}
+        onOpenChange={(open) => {
+          setIsNewAccountModalOpen(open);
+          if (!open) fetchAccounts();
+        }}
       />
     </DashboardLayout>
   );

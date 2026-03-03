@@ -2,27 +2,39 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Phone, MapPin, Camera, ShieldCheck, Lock, ChevronRight } from "lucide-react";
+import { User as UserIcon, Mail, Phone, MapPin, Camera, ShieldCheck, Lock, ChevronRight } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQuery } from "@tanstack/react-query";
 import { profileService } from "@/api/profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import UploadProfilePictureModal from "@/components/dashboard/UploadProfilePictureModal";
 import ChangePasswordModal from "@/components/dashboard/ChangePasswordModal";
 import ChangeTransferPinModal from "@/components/dashboard/ChangeTransferPinModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { User } from "@/api/types";
 
 const Profile = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['profile'],
-    queryFn: () => profileService.getProfile(),
-    throwOnError: false,
-  });
+  const fetchProfile = async () => {
+    setIsLoading(true);
+    try {
+      const response = await profileService.getProfile();
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   if (isLoading) {
     return (
@@ -39,8 +51,8 @@ const Profile = () => {
   }
 
   if (!user) return (
-    <div className="">
-      <p>No user avalaible. Please Login again</p>
+    <div className="flex items-center justify-center min-h-screen">
+      <p>No user available. Please Login again</p>
     </div>
   );
 
@@ -113,14 +125,14 @@ const Profile = () => {
                   <div className="space-y-2">
                     <Label>First Name</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input defaultValue={user.firstname || ''} className="pl-10 rounded-xl" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Last Name</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input defaultValue={user.lastname || ''} className="pl-10 rounded-xl" />
                     </div>
                   </div>
@@ -167,7 +179,10 @@ const Profile = () => {
 
       <UploadProfilePictureModal
         isOpen={isUploadModalOpen}
-        onOpenChange={setIsUploadModalOpen}
+        onOpenChange={(open) => {
+          setIsUploadModalOpen(open);
+          if (!open) fetchProfile();
+        }}
       />
 
       <ChangePasswordModal

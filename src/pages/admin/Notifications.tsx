@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
 import { adminService } from "@/api/admin";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -24,17 +23,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useState, useEffect } from "react";
+import { Notification } from "@/api/types";
 
 const AdminNotifications = () => {
-  const { data: notificationsResponse, isLoading } = useQuery({
-    queryKey: ['admin-notifications'],
-    queryFn: () => adminService.getAllNotifications(),
-  });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const notifications = notificationsResponse?.data || [];
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setIsLoading(true);
+      try {
+        const response = await adminService.getAllNotifications();
+        setNotifications(response.data || []);
+      } catch (error) {
+        console.error("Error fetching admin notifications:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   const getIcon = (title: string) => {
-    const t = title.toLowerCase();
+    const t = (title || '').toLowerCase();
     if (t.includes('alert') || t.includes('warning') || t.includes('failed')) return <AlertCircle className="w-4 h-4 text-rose-500" />;
     if (t.includes('success') || t.includes('completed') || t.includes('verified')) return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
     return <Info className="w-4 h-4 text-blue-500" />;
@@ -87,12 +100,12 @@ const AdminNotifications = () => {
                                 <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
                               </div>
                               <span className="text-[10px] text-muted-foreground whitespace-nowrap bg-secondary/30 px-2 py-0.5 rounded">
-                                {format(new Date(n.createdAt), 'MMM dd, HH:mm')}
+                                {n.createdAt ? format(new Date(n.createdAt), 'MMM dd, HH:mm') : 'N/A'}
                               </span>
                             </div>
                             <div className="flex items-center gap-3 mt-3">
                                <Badge variant="outline" className="text-[9px] font-bold tracking-tighter uppercase px-1.5 h-4 border-border/50">
-                                 User ID: {n.userId.slice(0, 8)}...
+                                 User ID: {n.userId?.slice(0, 8)}...
                                </Badge>
                                <span className={cn(
                                  "text-[10px] font-bold uppercase tracking-widest",

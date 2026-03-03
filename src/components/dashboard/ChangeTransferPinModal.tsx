@@ -15,9 +15,8 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { profileService } from "@/api/profile";
-import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, ShieldCheck, Key } from "lucide-react";
+import { Loader2, Key } from "lucide-react";
 
 interface ChangeTransferPinModalProps {
     isOpen: boolean;
@@ -29,7 +28,6 @@ const ChangeTransferPinModal = ({ isOpen, onOpenChange }: ChangeTransferPinModal
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    const queryClient = useQueryClient();
 
     const handleSetPin = async () => {
         if (pin.length !== 4) {
@@ -60,7 +58,6 @@ const ChangeTransferPinModal = ({ isOpen, onOpenChange }: ChangeTransferPinModal
         try {
             await profileService.updateTransferPin({ pin, otp });
             toast.success("Transfer PIN updated successfully!");
-            queryClient.invalidateQueries({ queryKey: ['profile'] });
             onOpenChange(false);
             resetForm();
         } catch (error: any) {

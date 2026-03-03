@@ -7,8 +7,7 @@ import {
   XCircle,
   Clock,
   Loader2,
-  Calendar,
-  DollarSign
+  Calendar
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
@@ -18,35 +17,44 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { adminService } from "@/api/admin";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Investment } from "@/api/types";
 
 const AdminInvestments = () => {
-  const queryClient = useQueryClient();
-  const { data: investmentsResponse, isLoading } = useQuery({
-    queryKey: ['admin-investments'],
-    queryFn: () => adminService.getInvestments(),
-  });
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string, status: string }) =>
-      adminService.updateInvestmentStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-investments'] });
+  const fetchInvestments = async () => {
+    setIsLoading(true);
+    try {
+      const response = await adminService.getInvestments();
+      setInvestments(response.data || []);
+    } catch (error) {
+      console.error("Error fetching admin investments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInvestments();
+  }, []);
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      await adminService.updateInvestmentStatus(id, status);
       toast.success("Investment status updated successfully");
-    },
-    onError: () => {
+      fetchInvestments();
+    } catch (error) {
       toast.error("Failed to update investment status");
     }
-  });
-
-  const investments = investmentsResponse?.data || [];
+  };
 
   const getStatusBadge = (status: string) => {
-    const s = status.toLowerCase();
+    const s = (status || '').toLowerCase();
     switch (s) {
       case 'active':
         return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800"><CheckCircle2 className="w-3 h-3 mr-1" /> Active</Badge>;
@@ -112,7 +120,7 @@ const AdminInvestments = () => {
                         <tr key={inv.id} className="hover:bg-secondary/5 transition-colors group">
                           <td className="px-6 py-4">
                             <p className="font-mono text-xs text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded inline-block">
-                              {inv.userId.slice(0, 12)}...
+                              {inv.userId?.slice(0, 12)}...
                             </p>
                           </td>
                           <td className="px-6 py-4">
@@ -130,10 +138,10 @@ const AdminInvestments = () => {
                           <td className="px-6 py-4">
                             <div className="flex flex-col gap-1">
                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                                  <Clock className="w-3 h-3" /> Start: {format(new Date(inv.startDate), 'MMM dd, yyyy')}
+                                  <Clock className="w-3 h-3" /> Start: {inv.startDate ? format(new Date(inv.startDate), 'MMM dd, yyyy') : 'N/A'}
                                </div>
                                <div className="flex items-center gap-1.5 text-[10px] text-foreground font-medium">
-                                  <Calendar className="w-3 h-3" /> End: {format(new Date(inv.endDate), 'MMM dd, yyyy')}
+                                  <Calendar className="w-3 h-3" /> End: {inv.endDate ? format(new Date(inv.endDate), 'MMM dd, yyyy') : 'N/A'}
                                </div>
                             </div>
                           </td>
@@ -148,19 +156,19 @@ const AdminInvestments = () => {
                               <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-xl">
                                 <DropdownMenuItem
                                   className="gap-2 rounded-lg cursor-pointer text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 dark:focus:bg-emerald-950/30"
-                                  onClick={() => updateStatusMutation.mutate({ id: inv.id, status: 'active' })}
+                                  onClick={() => handleUpdateStatus(inv.id, 'active')}
                                 >
                                   <CheckCircle2 className="w-4 h-4" /> Mark Active
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2 rounded-lg cursor-pointer text-blue-600 focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-950/30"
-                                  onClick={() => updateStatusMutation.mutate({ id: inv.id, status: 'matured' })}
+                                  onClick={() => handleUpdateStatus(inv.id, 'matured')}
                                 >
                                   <Calendar className="w-4 h-4" /> Mark Matured
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2 rounded-lg cursor-pointer text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-950/30"
-                                  onClick={() => updateStatusMutation.mutate({ id: inv.id, status: 'cancelled' })}
+                                  onClick={() => handleUpdateStatus(inv.id, 'cancelled')}
                                 >
                                   <XCircle className="w-4 h-4" /> Cancel Plan
                                 </DropdownMenuItem>
