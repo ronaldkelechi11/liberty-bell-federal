@@ -50,6 +50,7 @@ const Analytics = () => {
       try {
         const response = await adminService.getAnalyticsOverview();
         setAnalytics(response.data);
+
       } catch (error) {
         console.error("Error fetching analytics:", error);
       } finally {
@@ -61,6 +62,8 @@ const Analytics = () => {
   }, []);
 
   const chartData = useMemo(() => generateChartData(), []);
+
+  const growthChartData = useMemo(() => analytics?.growthCharts || [], [analytics?.growthCharts]);
 
   const stats = [
     {
@@ -166,14 +169,14 @@ const Analytics = () => {
             </CardHeader>
             <CardContent className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <LineChart data={growthChartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
-                  <Line type="monotone" dataKey="deposits" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>

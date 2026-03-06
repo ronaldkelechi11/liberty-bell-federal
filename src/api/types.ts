@@ -205,12 +205,18 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface GrowthChartData {
+  name: string;
+  users: number;
+}
+
 export interface AnalyticsOverview {
   totalUsers: number;
   totalDeposits: number;
   totalWithdrawals: number;
   totalInvestments: number;
   activeAccounts: number;
+  growthCharts: GrowthChartData[];
 }
 
 export interface PaymentMethod {

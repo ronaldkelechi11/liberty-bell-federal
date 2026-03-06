@@ -14,7 +14,8 @@ import {
   Mail,
   ShieldAlert,
   History,
-  Loader2
+  Loader2,
+  Wallet
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect } from "react";
 import { adminService } from "@/api/admin";
-import { User, Account, AdminCreditDebitDto } from "@/api/types";
+import { User, Account, AdminCreditDebitDto, Transaction } from "@/api/types";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -183,7 +184,7 @@ const UserAccounts = () => {
   };
 
   const handleCloseAccount = async (accountId: string) => {
-    if(!confirm("Are you sure you want to CLOSE this account? This cannot be undone.")) return;
+    if (!confirm("Are you sure you want to CLOSE this account? This cannot be undone.")) return;
     try {
       await adminService.closeAccount(accountId);
       toast.success("Account closed successfully");
@@ -412,7 +413,7 @@ const UserAccounts = () => {
       </div>
 
       {/* Credit Modal */}
-      <Dialog open={isCreditModalOpen} onOpenChange={(open) => { setIsCreditModalOpen(open); if(!open) resetActionForm(); }}>
+      <Dialog open={isCreditModalOpen} onOpenChange={(open) => { setIsCreditModalOpen(open); if (!open) resetActionForm(); }}>
         <DialogContent className="sm:max-w-[425px] rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -484,7 +485,7 @@ const UserAccounts = () => {
       </Dialog>
 
       {/* Debit Modal */}
-      <Dialog open={isDebitModalOpen} onOpenChange={(open) => { setIsDebitModalOpen(open); if(!open) resetActionForm(); }}>
+      <Dialog open={isDebitModalOpen} onOpenChange={(open) => { setIsDebitModalOpen(open); if (!open) resetActionForm(); }}>
         <DialogContent className="sm:max-w-[425px] rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -556,7 +557,7 @@ const UserAccounts = () => {
       </Dialog>
 
       {/* Update Limit Modal */}
-      <Dialog open={isLimitModalOpen} onOpenChange={(open) => { setIsLimitModalOpen(open); if(!open) resetActionForm(); }}>
+      <Dialog open={isLimitModalOpen} onOpenChange={(open) => { setIsLimitModalOpen(open); if (!open) resetActionForm(); }}>
         <DialogContent className="sm:max-w-[425px] rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -639,7 +640,7 @@ const UserAccounts = () => {
       </Dialog>
 
       {/* Reset PIN Modal */}
-      <Dialog open={isPinModalOpen} onOpenChange={(open) => { setIsPinModalOpen(open); if(!open) resetActionForm(); }}>
+      <Dialog open={isPinModalOpen} onOpenChange={(open) => { setIsPinModalOpen(open); if (!open) resetActionForm(); }}>
         <DialogContent className="sm:max-w-[425px] rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
