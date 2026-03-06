@@ -98,35 +98,40 @@ const UserAccounts = () => {
   }, []);
 
   const handleOpenCredit = async (user: User) => {
+    const userId = user.id || (user as any)._id;
     setSelectedUser(user);
     setIsCreditModalOpen(true);
-    fetchUserAccounts(user.id);
+    fetchUserAccounts(userId);
   };
 
   const handleOpenDebit = async (user: User) => {
+    const userId = user.id || (user as any)._id;
     setSelectedUser(user);
     setIsDebitModalOpen(true);
-    fetchUserAccounts(user.id);
+    fetchUserAccounts(userId);
   };
 
   const handleOpenLimit = async (user: User) => {
+    const userId = user.id || (user as any)._id;
     setSelectedUser(user);
     setIsLimitModalOpen(true);
-    fetchUserAccounts(user.id);
+    fetchUserAccounts(userId);
   };
 
   const handleOpenAccounts = async (user: User) => {
+    const userId = user.id || (user as any)._id;
     setSelectedUser(user);
     setIsAccountsModalOpen(true);
-    fetchUserAccounts(user.id);
+    fetchUserAccounts(userId);
   };
 
   const handleOpenTransactions = async (user: User) => {
+    const userId = user.id || (user as any)._id;
     setSelectedUser(user);
     setIsTransactionsModalOpen(true);
     setIsActionPending(true);
     try {
-      const response = await adminService.getUserTransactions(user.id);
+      const response = await adminService.getUserTransactions(userId);
       setUserTransactions(response.data || []);
     } catch (error) {
       toast.error("Failed to fetch user transactions");
@@ -136,20 +141,22 @@ const UserAccounts = () => {
   };
 
   const handleFreezeAccount = async (account: Account) => {
+    const userId = selectedUser!.id || (selectedUser as any)._id;
     try {
-      await adminService.freezeAccount(account.id);
+      await adminService.freezeAccount(account.id || account._id);
       toast.success("Account frozen successfully");
-      fetchUserAccounts(selectedUser!.id);
+      fetchUserAccounts(userId);
     } catch (error) {
       toast.error("Failed to freeze account");
     }
   };
 
   const handleUnfreezeAccount = async (account: Account) => {
+    const userId = selectedUser!.id || (selectedUser as any)._id;
     try {
-      await adminService.unfreezeAccount(account.id);
+      await adminService.unfreezeAccount(account.id || account._id);
       toast.success("Account unfrozen successfully");
-      fetchUserAccounts(selectedUser!.id);
+      fetchUserAccounts(userId);
     } catch (error) {
       toast.error("Failed to unfreeze account");
     }
@@ -174,8 +181,9 @@ const UserAccounts = () => {
     if (!selectedUser || !newPin) return toast.error("Enter new PIN");
     if (newPin.length !== 4) return toast.error("PIN must be 4 digits");
     setIsActionPending(true);
+    const userId = selectedUser.id || (selectedUser as any)._id;
     try {
-      await adminService.updateUserTransferPin(selectedUser.id, { pin: newPin });
+      await adminService.updateUserTransferPin(userId, { pin: newPin });
       toast.success("Transfer PIN updated successfully");
       setIsPinModalOpen(false);
       resetActionForm();

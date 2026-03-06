@@ -120,11 +120,11 @@ export interface ExternalTransferDto {
   recipientName: string;
   recipientAccountNumber: string;
   recipientRoutingNumber: string;
+  transferPin: string;
   bankName: string;
   amount: number;
   description: string;
-  otp: string;
-  transferPin: string;
+  otp?: string;
 }
 
 export interface AdminCreditDebitDto {

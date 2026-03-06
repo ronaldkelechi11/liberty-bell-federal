@@ -141,7 +141,7 @@ const DashboardLayout = ({ children, isAdmin: isAdminProp, profile: profileProp 
         </main>
       </div>
 
-      <BottomNav />
+      <BottomNav isAdmin={isAdmin} />
       <SetupWizard />
     </div>
   );
