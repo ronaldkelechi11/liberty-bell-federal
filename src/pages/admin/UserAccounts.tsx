@@ -66,23 +66,26 @@ const UserAccounts = () => {
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
 
-  const fetchUsers = async () => {
-    setIsLoading(true);
-    try {
-      const response = await adminService.getUsers();
-      setUsers(response.data || []);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const fetchUsers = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await adminService.getUsers();
+  //     console.log(response.data);
+  //     setUsers(response.data || []);
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
         const response = await adminService.getUsers();
+        console.log(response.data);
+
         setUsers(response.data || []);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -194,9 +197,9 @@ const UserAccounts = () => {
     }
   };
 
-  const fetchUserAccounts = async (userId: string) => {
+  const fetchUserAccounts = async (_id: string) => {
     try {
-      const response = await adminService.getAccounts({ userId });
+      const response = await adminService.getAccounts({ _id });
       setUserAccounts(response.data || []);
     } catch (error) {
       toast.error("Failed to fetch user accounts");
@@ -276,7 +279,7 @@ const UserAccounts = () => {
           <div className="flex gap-3">
             <Button
               className="rounded-xl gap-2 bg-primary hover:bg-primary/90"
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/register')}
             >
               <UserIcon className="w-4 h-4" /> Create User
             </Button>
@@ -329,7 +332,7 @@ const UserAccounts = () => {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20 group-hover:scale-110 transition-transform">
-                                {u.firstname?.[0]}{u.lastname?.[0]}
+                                {u.profilePicture ? <img src={u.profilePicture} alt={`${u.firstname} ${u.lastname}`} className="w-full h-full object-cover rounded-full" /> : <span>{u.firstname?.[0]}{u.lastname?.[0]}</span>}
                               </div>
                               <div>
                                 <p className="font-bold text-foreground">{u.firstname} {u.lastname}</p>
@@ -344,8 +347,8 @@ const UserAccounts = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${u.isEmailVerified ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                              <span className="text-xs font-medium">{u.isEmailVerified ? 'Verified' : 'Unverified'}</span>
+                              <div className={`w-2 h-2 rounded-full ${u.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                              <span className="text-xs font-medium">{u.isVerified ? 'Verified' : 'Unverified'}</span>
                             </div>
                             <p className="text-[10px] text-muted-foreground mt-0.5">{u.email}</p>
                           </td>

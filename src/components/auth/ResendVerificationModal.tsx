@@ -52,8 +52,8 @@ const ResendVerificationModal = ({ isOpen, onClose }: ResendVerificationModalPro
       const response = await authService.resendVerification(values);
       toast.success(response.message || "Verification code sent to your email.");
       onClose();
-      // Redirect to the verification page with the userId
-      navigate(`/verify-email?userId=${response.userId}`);
+      // Redirect to the verification page with the _id
+      navigate(`/verify-email?_id=${response._id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to resend verification code.");
     } finally {

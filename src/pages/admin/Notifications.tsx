@@ -104,15 +104,15 @@ const AdminNotifications = () => {
                               </span>
                             </div>
                             <div className="flex items-center gap-3 mt-3">
-                               <Badge variant="outline" className="text-[9px] font-bold tracking-tighter uppercase px-1.5 h-4 border-border/50">
-                                 User ID: {n.userId?.slice(0, 8)}...
-                               </Badge>
-                               <span className={cn(
-                                 "text-[10px] font-bold uppercase tracking-widest",
-                                 n.isRead ? "text-muted-foreground" : "text-primary"
-                               )}>
-                                 {n.isRead ? 'Seen' : 'Unread'}
-                               </span>
+                              <Badge variant="outline" className="text-[9px] font-bold tracking-tighter uppercase px-1.5 h-4 border-border/50">
+                                User ID: {n._id?.slice(0, 8)}...
+                              </Badge>
+                              <span className={cn(
+                                "text-[10px] font-bold uppercase tracking-widest",
+                                n.isRead ? "text-muted-foreground" : "text-primary"
+                              )}>
+                                {n.isRead ? 'Seen' : 'Unread'}
+                              </span>
                             </div>
                           </div>
                           <DropdownMenu>
@@ -136,46 +136,46 @@ const AdminNotifications = () => {
           </div>
 
           <div className="space-y-6">
-             <Card className="border-none shadow-sm bg-primary/5 border border-primary/10 overflow-hidden relative">
-                <div className="absolute -right-4 -top-4 opacity-5 rotate-12">
-                   <Send className="w-32 h-32 text-primary" />
+            <Card className="border-none shadow-sm bg-primary/5 border border-primary/10 overflow-hidden relative">
+              <div className="absolute -right-4 -top-4 opacity-5 rotate-12">
+                <Send className="w-32 h-32 text-primary" />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Quick Broadcast</CardTitle>
+                <CardDescription>Send a push notification to all platform users.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 relative z-10">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Title</label>
+                  <input className="w-full bg-background border border-border/50 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="e.g., Scheduled Maintenance" />
                 </div>
-                <CardHeader>
-                   <CardTitle className="text-lg">Quick Broadcast</CardTitle>
-                   <CardDescription>Send a push notification to all platform users.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 relative z-10">
-                   <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Title</label>
-                      <input className="w-full bg-background border border-border/50 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="e.g., Scheduled Maintenance" />
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Message</label>
-                      <textarea className="w-full bg-background border border-border/50 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none" placeholder="Enter broadcast details..." />
-                   </div>
-                   <Button className="w-full rounded-xl gap-2 h-11 font-bold">
-                      <Send className="w-4 h-4" /> Send Broadcast
-                   </Button>
-                </CardContent>
-             </Card>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Message</label>
+                  <textarea className="w-full bg-background border border-border/50 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all min-h-[100px] resize-none" placeholder="Enter broadcast details..." />
+                </div>
+                <Button className="w-full rounded-xl gap-2 h-11 font-bold">
+                  <Send className="w-4 h-4" /> Send Broadcast
+                </Button>
+              </CardContent>
+            </Card>
 
-             <Card className="border-none shadow-sm bg-card/50 backdrop-blur-sm">
-                <CardHeader>
-                   <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Notification Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-sm font-medium">Total Sent</span>
-                      <span className="font-bold">{notifications.length}</span>
-                   </div>
-                   <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-sm font-medium">Read Rate</span>
-                      <span className="font-bold text-emerald-600">
-                        {notifications.length > 0 ? Math.round((notifications.filter(n => n.isRead).length / notifications.length) * 100) : 0}%
-                      </span>
-                   </div>
-                </CardContent>
-             </Card>
+            <Card className="border-none shadow-sm bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Notification Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-sm font-medium">Total Sent</span>
+                  <span className="font-bold">{notifications.length}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <span className="text-sm font-medium">Read Rate</span>
+                  <span className="font-bold text-emerald-600">
+                    {notifications.length > 0 ? Math.round((notifications.filter(n => n.isRead).length / notifications.length) * 100) : 0}%
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

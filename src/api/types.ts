@@ -8,6 +8,7 @@ export type InvestmentPlan = 'starter' | 'balanced' | 'advanced';
 export type AccountStatus = 'active' | 'frozen' | 'closed';
 
 export interface User {
+  isVerified: any;
   id: string;
   firstname: string;
   lastname: string;
@@ -56,12 +57,12 @@ export interface LoginDto {
 }
 
 export interface VerifyOtpDto {
-  userId: string;
+  _id: string;
   otp: string;
 }
 
 export interface VerifyEmailDto {
-  userId: string;
+  _id: string;
   otp: string;
 }
 
@@ -96,7 +97,7 @@ export interface CreateAccountDto {
 
 export interface Account {
   id: string;
-  userId: string;
+  _id: string;
   accountNumber: string;
   type: AccountType;
   balance: number;
@@ -142,7 +143,7 @@ export interface CreateCardDto {
   expiryDate?: string;
   cardType: string;
   cvv?: string;
-  userId?: string;
+  _id?: string;
   otp: string;
 }
 
@@ -156,7 +157,7 @@ export interface UpdateCardDto {
 
 export interface Card {
   id: string;
-  userId: string;
+  _id: string;
   cardNumber: string;
   cardHolder: string;
   expiryDate: string;
@@ -174,7 +175,7 @@ export interface CreateInvestmentDto {
 
 export interface Investment {
   id: string;
-  userId: string;
+  _id: string;
   planId: InvestmentPlan;
   amount: number;
   status: InvestmentStatus;
@@ -198,7 +199,7 @@ export interface Transaction {
 
 export interface Notification {
   id: string;
-  userId: string;
+  _id: string;
   title: string;
   message: string;
   isRead: boolean;

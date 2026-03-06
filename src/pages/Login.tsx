@@ -32,7 +32,7 @@ const Login = () => {
   const [showResendModal, setShowResendModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isOtpLoading, setIsOtpLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [_id, set_id] = useState<string | null>(null);
   const [loginData, setLoginData] = useState<LoginFormValues | null>(null);
   const navigate = useNavigate();
 
@@ -63,7 +63,7 @@ const Login = () => {
       }
 
       // Otherwise require OTP verification
-      setUserId(response.userId);
+      set_id(response._id);
       setLoginData(values);
       setShowOtpModal(true);
 
@@ -83,13 +83,13 @@ const Login = () => {
   // OTP VERIFICATION STEP
   // =========================
   const handleOtpVerify = async (otp: string) => {
-    if (!userId) return;
+    if (!_id) return;
 
     setIsOtpLoading(true);
 
     try {
       const response = await authService.verifyLoginOtp({
-        userId,
+        _id,
         otp,
       });
 
@@ -100,7 +100,7 @@ const Login = () => {
 
       // Clear sensitive state
       setLoginData(null);
-      setUserId(null);
+      set_id(null);
       setShowOtpModal(false);
 
       navigate("/dashboard");

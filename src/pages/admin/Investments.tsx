@@ -76,15 +76,15 @@ const AdminInvestments = () => {
             <p className="text-muted-foreground mt-1">Review and manage all user investment plans and maturities.</p>
           </div>
           <div className="flex gap-3">
-             <Card className="flex items-center gap-4 px-4 py-2 bg-primary/5 border-primary/10 shadow-none">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                <div>
-                   <p className="text-[10px] uppercase font-bold text-muted-foreground leading-none">Total Assets</p>
-                   <p className="text-lg font-bold text-foreground">
-                      ${investments.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
-                   </p>
-                </div>
-             </Card>
+            <Card className="flex items-center gap-4 px-4 py-2 bg-primary/5 border-primary/10 shadow-none">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              <div>
+                <p className="text-[10px] uppercase font-bold text-muted-foreground leading-none">Total Assets</p>
+                <p className="text-lg font-bold text-foreground">
+                  ${investments.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
+                </p>
+              </div>
+            </Card>
           </div>
         </div>
 
@@ -120,7 +120,7 @@ const AdminInvestments = () => {
                         <tr key={inv.id} className="hover:bg-secondary/5 transition-colors group">
                           <td className="px-6 py-4">
                             <p className="font-mono text-xs text-muted-foreground bg-secondary/30 px-2 py-0.5 rounded inline-block">
-                              {inv.userId?.slice(0, 12)}...
+                              {inv._id?.slice(0, 12)}...
                             </p>
                           </td>
                           <td className="px-6 py-4">
@@ -137,12 +137,12 @@ const AdminInvestments = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col gap-1">
-                               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                                  <Clock className="w-3 h-3" /> Start: {inv.startDate ? format(new Date(inv.startDate), 'MMM dd, yyyy') : 'N/A'}
-                               </div>
-                               <div className="flex items-center gap-1.5 text-[10px] text-foreground font-medium">
-                                  <Calendar className="w-3 h-3" /> End: {inv.endDate ? format(new Date(inv.endDate), 'MMM dd, yyyy') : 'N/A'}
-                               </div>
+                              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                                <Clock className="w-3 h-3" /> Start: {inv.startDate ? format(new Date(inv.startDate), 'MMM dd, yyyy') : 'N/A'}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[10px] text-foreground font-medium">
+                                <Calendar className="w-3 h-3" /> End: {inv.endDate ? format(new Date(inv.endDate), 'MMM dd, yyyy') : 'N/A'}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">{getStatusBadge(inv.status)}</td>
