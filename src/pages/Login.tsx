@@ -56,8 +56,8 @@ const Login = () => {
 
 
       // If backend already issues token (e.g. admin bypass OTP)
-      if (response.token) {
-        await setTokens(response.token);
+      if (response.access_token) {
+        await setTokens(response.access_token);
         localStorage.setItem("user", JSON.stringify(response.user));
         toast.success("Welcome back, Admin.");
         navigate("/admin");
