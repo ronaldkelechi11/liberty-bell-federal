@@ -12,5 +12,5 @@ export const accountService = {
   closeAccount: (id: string) => axiosAuthenticatedInstance.patch<{ message: string }>(`/accounts/${id}/close`),
   getStatement: (id: string, month: number, year: number) =>
     axiosAuthenticatedInstance.get<Transaction[]>(`/accounts/${id}/statement?month=${month}&year=${year}`),
-  getAllTransactions: () => axiosAuthenticatedInstance.get<Transaction[]>('/transactions/my'),
+  getAllTransactions: () => axiosAuthenticatedInstance.get<Transaction[]>('/accounts/transactions/my'),
 };

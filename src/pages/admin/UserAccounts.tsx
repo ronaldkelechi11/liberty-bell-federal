@@ -205,9 +205,9 @@ const UserAccounts = () => {
     }
   };
 
-  const fetchUserAccounts = async (_id: string) => {
+  const fetchUserAccounts = async (userId: string) => {
     try {
-      const response = await adminService.getAccounts({ _id });
+      const response = await adminService.getAccounts({ userId });
       setUserAccounts(response.data || []);
     } catch (error) {
       toast.error("Failed to fetch user accounts");

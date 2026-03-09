@@ -57,12 +57,12 @@ export interface LoginDto {
 }
 
 export interface VerifyOtpDto {
-  _id: string;
+  userId: string;
   otp: string;
 }
 
 export interface VerifyEmailDto {
-  _id: string;
+  userId: string;
   otp: string;
 }
 
@@ -143,7 +143,7 @@ export interface CreateCardDto {
   expiryDate?: string;
   cardType: string;
   cvv?: string;
-  _id?: string;
+  userId?: string;
   otp: string;
 }
 
