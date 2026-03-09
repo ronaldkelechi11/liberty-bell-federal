@@ -59,7 +59,12 @@ const OtpModal = ({ isOpen, onClose, onVerify, emailOrPhone, loading = false }: 
             </InputOTPGroup>
           </InputOTP>
           <div className="mt-8 w-full space-y-4">
-            <Button className="w-full btn-glow" onClick={handleVerify} loading={loading}>
+            <Button
+              className="w-full btn-glow active:scale-95 transition-transform duration-150"
+              onClick={handleVerify}
+              loading={loading}
+              disabled={loading}
+            >
               Verify & Login
             </Button>
             <div className="text-center">

@@ -52,6 +52,8 @@ const Login = () => {
 
     try {
       const response = await authService.login(values);
+      console.log(response);
+
 
       // If backend already issues token (e.g. admin bypass OTP)
       if (response.token) {
@@ -63,7 +65,7 @@ const Login = () => {
       }
 
       // Otherwise require OTP verification
-      setUserId(response._id);
+      setUserId(response.userId);
       setLoginData(values);
       setShowOtpModal(true);
 
@@ -87,13 +89,16 @@ const Login = () => {
 
     setIsOtpLoading(true);
 
+
     try {
       const response = await authService.verifyLoginOtp({
         userId,
         otp,
       });
 
-      await setTokens(response.token);
+      console.log("OTP MODAL: " + response);
+
+      await setTokens(response.access_token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
       toast.success("Identity verified. Welcome back.");
@@ -102,12 +107,7 @@ const Login = () => {
       setLoginData(null);
       setUserId(null);
       setShowOtpModal(false);
-
-      if (response.user.role === 'admin') {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
