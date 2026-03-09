@@ -74,7 +74,7 @@ const PaymentMethods = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {methods.map((m) => (
-              <Card key={m.id} className="border-none shadow-sm hover:shadow-md transition-all group">
+              <Card key={m._id || m.id} className="border-none shadow-sm hover:shadow-md transition-all group">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 group-hover:bg-primary group-hover:text-white transition-colors">
@@ -108,7 +108,7 @@ const PaymentMethods = () => {
                         onClick={async () => {
                           if (confirm(`Are you sure you want to delete ${m.name}?`)) {
                             try {
-                              await paymentMethodService.delete(m.id);
+                              await paymentMethodService.delete(m._id || m.id || "");
                               toast.success("Payment method deleted");
                               fetchMethods();
                             } catch (error) {
@@ -350,7 +350,7 @@ const PaymentMethods = () => {
 
                   setIsSubmitting(true);
                   try {
-                    await paymentMethodService.update(selectedMethod.id, {
+                    await paymentMethodService.update(selectedMethod._id || selectedMethod.id || "", {
                       ...formData,
                       minimumAmount: formData.minimumAmount ? parseFloat(formData.minimumAmount) : undefined,
                       maximumAmount: formData.maximumAmount ? parseFloat(formData.maximumAmount) : undefined,

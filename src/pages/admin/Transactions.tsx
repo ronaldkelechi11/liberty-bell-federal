@@ -39,7 +39,9 @@ const AdminTransactions = () => {
       setIsLoading(true);
       try {
         const response = await adminService.getTransactions();
-        setTransactions(response.data || []);
+        // Since getTransactions is mocked to return a Promise resolving directly to an array or object
+        // we check for response.data safely or use the response if it is an array.
+        setTransactions((Array.isArray(response) ? response : (response as any).data) || []);
       } catch (error) {
         console.error("Error fetching admin transactions:", error);
       } finally {

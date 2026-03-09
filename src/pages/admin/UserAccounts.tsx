@@ -132,7 +132,7 @@ const UserAccounts = () => {
     setIsActionPending(true);
     try {
       const response = await adminService.getUserTransactions(userId);
-      setUserTransactions(response.data || []);
+      setUserTransactions((Array.isArray(response) ? response : (response as any).data) || []);
     } catch (error) {
       toast.error("Failed to fetch user transactions");
     } finally {
