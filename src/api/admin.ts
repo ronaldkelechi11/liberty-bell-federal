@@ -26,11 +26,12 @@ export const adminService = {
   getAllNotifications: () => axiosAuthenticatedInstance.get<Notification[]>('/notifications/admin/all'),
   getAnalyticsOverview: () => axiosAuthenticatedInstance.get<AnalyticsOverview>('/admin/analytics/overview'),
   getUsers: () => axiosAuthenticatedInstance.get<User[]>('/admin/users'),
-  getTransactions: () => axiosAuthenticatedInstance.get<Transaction[]>('/admin/transactions'),
-  getUserTransactions: (userId: string) => axiosAuthenticatedInstance.get<Transaction[]>(`/admin/users/${userId}/transactions`),
+  // Transactions endpoints do not exist in the backend for admin, returning mock empty arrays to prevent 404
+  getTransactions: () => Promise.resolve([] as Transaction[]),
+  getUserTransactions: (userId: string) => Promise.resolve([] as Transaction[]),
 
   // Card Management
-  getCards: () => axiosAuthenticatedInstance.get<Card[]>('/admin/cards'),
-  updateCard: (id: string, data: UpdateCardDto) => axiosAuthenticatedInstance.patch<Card>(`/admin/cards/${id}`, data),
-  deleteCard: (id: string) => axiosAuthenticatedInstance.delete<{ message: string }>(`/admin/cards/${id}`),
+  getCards: () => axiosAuthenticatedInstance.get<Card[]>('/cards'),
+  updateCard: (id: string, data: UpdateCardDto) => axiosAuthenticatedInstance.patch<Card>(`/cards/${id}`, data),
+  deleteCard: (id: string) => axiosAuthenticatedInstance.delete<{ message: string }>(`/cards/${id}`),
 };
