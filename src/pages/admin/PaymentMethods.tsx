@@ -21,7 +21,9 @@ const PaymentMethods = () => {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
 
   // New Method Form State
   const [formData, setFormData] = useState({
@@ -81,8 +83,42 @@ const PaymentMethods = () => {
                        <Banknote className="w-6 h-6" />}
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-secondary"><Edit2 className="w-3.5 h-3.5" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5" /></Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full hover:bg-secondary"
+                        onClick={() => {
+                          setSelectedMethod(m);
+                          setFormData({
+                            name: m.name,
+                            description: m.description,
+                            processingTime: m.processingTime || "",
+                            minimumAmount: m.minimumAmount?.toString() || "",
+                            maximumAmount: m.maximumAmount?.toString() || ""
+                          });
+                          setIsEditModalOpen(true);
+                        }}
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                        onClick={async () => {
+                          if (confirm(`Are you sure you want to delete ${m.name}?`)) {
+                            try {
+                              await paymentMethodService.delete(m.id);
+                              toast.success("Payment method deleted");
+                              fetchMethods();
+                            } catch (error) {
+                              toast.error("Failed to delete payment method");
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </div>
                   <CardTitle className="mt-4 text-lg">{m.name}</CardTitle>
@@ -228,6 +264,117 @@ const PaymentMethods = () => {
                 className="rounded-xl min-w-[120px]"
               >
                 {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Method"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="sm:max-w-[500px] rounded-3xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Edit Payment Method</DialogTitle>
+              <DialogDescription>
+                Update the configuration for {selectedMethod?.name}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Method Name</Label>
+                <Input
+                  id="edit-name"
+                  placeholder="e.g. Visa/Mastercard, Bitcoin"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Input
+                  id="edit-description"
+                  placeholder="Brief description of the method"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-processingTime">Processing Time</Label>
+                <Input
+                  id="edit-processingTime"
+                  placeholder="e.g. Instant, 1-3 Business Days"
+                  value={formData.processingTime}
+                  onChange={(e) => setFormData({ ...formData, processingTime: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-minAmount">Minimum Amount ($)</Label>
+                  <Input
+                    id="edit-minAmount"
+                    type="number"
+                    placeholder="10"
+                    value={formData.minimumAmount}
+                    onChange={(e) => setFormData({ ...formData, minimumAmount: e.target.value })}
+                    className="rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-maxAmount">Maximum Amount ($)</Label>
+                  <Input
+                    id="edit-maxAmount"
+                    type="number"
+                    placeholder="10000"
+                    value={formData.maximumAmount}
+                    onChange={(e) => setFormData({ ...formData, maximumAmount: e.target.value })}
+                    className="rounded-xl"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!formData.name || !formData.description) {
+                    return toast.error("Name and Description are required");
+                  }
+                  if (!selectedMethod) return;
+
+                  setIsSubmitting(true);
+                  try {
+                    await paymentMethodService.update(selectedMethod.id, {
+                      ...formData,
+                      minimumAmount: formData.minimumAmount ? parseFloat(formData.minimumAmount) : undefined,
+                      maximumAmount: formData.maximumAmount ? parseFloat(formData.maximumAmount) : undefined,
+                    });
+                    toast.success("Payment method updated successfully");
+                    setIsEditModalOpen(false);
+                    setFormData({
+                      name: "",
+                      description: "",
+                      processingTime: "",
+                      minimumAmount: "",
+                      maximumAmount: ""
+                    });
+                    fetchMethods();
+                  } catch (error) {
+                    toast.error("Failed to update payment method");
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                disabled={isSubmitting}
+                className="rounded-xl min-w-[120px]"
+              >
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Changes"}
               </Button>
             </DialogFooter>
           </DialogContent>

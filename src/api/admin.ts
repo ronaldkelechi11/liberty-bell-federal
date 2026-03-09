@@ -1,5 +1,5 @@
 import { axiosAuthenticatedInstance } from './client';
-import { User, Account, Investment, Notification, AnalyticsOverview, CreateTransferPinDto, AdminCreditDebitDto, UpdateLimitDto, Transaction } from './types';
+import { User, Account, Investment, Notification, AnalyticsOverview, CreateTransferPinDto, AdminCreditDebitDto, UpdateLimitDto, Transaction, Card, UpdateCardDto } from './types';
 
 export const adminService = {
   updateUserTransferPin: (_id: string, data: CreateTransferPinDto) =>
@@ -28,4 +28,9 @@ export const adminService = {
   getUsers: () => axiosAuthenticatedInstance.get<User[]>('/admin/users'),
   getTransactions: () => axiosAuthenticatedInstance.get<Transaction[]>('/admin/transactions'),
   getUserTransactions: (_id: string) => axiosAuthenticatedInstance.get<Transaction[]>(`/admin/users/${_id}/transactions`),
+
+  // Card Management
+  getCards: () => axiosAuthenticatedInstance.get<Card[]>('/admin/cards'),
+  updateCard: (id: string, data: UpdateCardDto) => axiosAuthenticatedInstance.patch<Card>(`/admin/cards/${id}`, data),
+  deleteCard: (id: string) => axiosAuthenticatedInstance.delete<{ message: string }>(`/admin/cards/${id}`),
 };

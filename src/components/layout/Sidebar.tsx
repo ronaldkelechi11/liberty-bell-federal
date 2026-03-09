@@ -51,6 +51,7 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Users", href: "/admin/accounts", icon: Users },
     { name: "Transactions", href: "/admin/transactions", icon: History },
+    { name: "Cards", href: "/admin/cards", icon: CreditCard },
     { name: "Investments", href: "/admin/investments", icon: TrendingUp },
     { name: "Payments", href: "/admin/payment-methods", icon: ShieldCheck },
     { name: "Notifications", href: "/admin/notifications", icon: Bell },
