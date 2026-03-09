@@ -5,10 +5,32 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { paymentMethodService } from "@/api/payment-methods";
 import { useState, useEffect } from "react";
 import { PaymentMethod } from "@/api/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 const PaymentMethods = () => {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // New Method Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    processingTime: "",
+    minimumAmount: "",
+    maximumAmount: ""
+  });
 
   const fetchMethods = async () => {
     setIsLoading(true);
@@ -34,7 +56,10 @@ const PaymentMethods = () => {
             <h1 className="text-3xl font-heading font-bold text-foreground tracking-tight">Payment Gateways</h1>
             <p className="text-muted-foreground mt-1">Configure and manage available deposit and withdrawal methods.</p>
           </div>
-          <Button className="rounded-xl gap-2 shadow-sm">
+          <Button
+            className="rounded-xl gap-2 shadow-sm"
+            onClick={() => setIsAddModalOpen(true)}
+          >
             <Plus className="w-4 h-4" /> Add New Method
           </Button>
         </div>
@@ -85,7 +110,10 @@ const PaymentMethods = () => {
               </Card>
             ))}
 
-            <Card className="border-2 border-dashed border-border/50 flex flex-col items-center justify-center p-8 bg-secondary/5 hover:bg-secondary/10 transition-colors cursor-pointer group">
+            <Card
+              className="border-2 border-dashed border-border/50 flex flex-col items-center justify-center p-8 bg-secondary/5 hover:bg-secondary/10 transition-colors cursor-pointer group"
+              onClick={() => setIsAddModalOpen(true)}
+            >
               <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Plus className="w-6 h-6 text-muted-foreground" />
               </div>
@@ -95,6 +123,115 @@ const PaymentMethods = () => {
             </Card>
           </div>
         )}
+
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+          <DialogContent className="sm:max-w-[500px] rounded-3xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Add Payment Method</DialogTitle>
+              <DialogDescription>
+                Configure a new payment gateway for user deposits and withdrawals.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Method Name</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g. Visa/Mastercard, Bitcoin"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  placeholder="Brief description of the method"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="processingTime">Processing Time</Label>
+                <Input
+                  id="processingTime"
+                  placeholder="e.g. Instant, 1-3 Business Days"
+                  value={formData.processingTime}
+                  onChange={(e) => setFormData({ ...formData, processingTime: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="minAmount">Minimum Amount ($)</Label>
+                  <Input
+                    id="minAmount"
+                    type="number"
+                    placeholder="10"
+                    value={formData.minimumAmount}
+                    onChange={(e) => setFormData({ ...formData, minimumAmount: e.target.value })}
+                    className="rounded-xl"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="maxAmount">Maximum Amount ($)</Label>
+                  <Input
+                    id="maxAmount"
+                    type="number"
+                    placeholder="10000"
+                    value={formData.maximumAmount}
+                    onChange={(e) => setFormData({ ...formData, maximumAmount: e.target.value })}
+                    className="rounded-xl"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddModalOpen(false)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!formData.name || !formData.description) {
+                    return toast.error("Name and Description are required");
+                  }
+                  setIsSubmitting(true);
+                  try {
+                    await paymentMethodService.create({
+                      ...formData,
+                      minimumAmount: formData.minimumAmount ? parseFloat(formData.minimumAmount) : undefined,
+                      maximumAmount: formData.maximumAmount ? parseFloat(formData.maximumAmount) : undefined,
+                    });
+                    toast.success("Payment method created successfully");
+                    setIsAddModalOpen(false);
+                    setFormData({
+                      name: "",
+                      description: "",
+                      processingTime: "",
+                      minimumAmount: "",
+                      maximumAmount: ""
+                    });
+                    fetchMethods();
+                  } catch (error) {
+                    toast.error("Failed to create payment method");
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                disabled={isSubmitting}
+                className="rounded-xl min-w-[120px]"
+              >
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Method"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Card className="bg-primary/5 border border-primary/10 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-10">

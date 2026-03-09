@@ -23,6 +23,7 @@ import Cards from "./pages/dashboard/Cards";
 import Investments from "./pages/dashboard/Investments";
 import Notifications from "./pages/dashboard/Notifications";
 import Profile from "./pages/dashboard/Profile";
+import CryptoWallet from "./pages/dashboard/CryptoWallet";
 
 // Admin Pages
 import Analytics from "./pages/admin/Analytics";
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/dashboard/investments" element={<Investments />} />
           <Route path="/dashboard/notifications" element={<Notifications />} />
           <Route path="/dashboard/profile" element={<Profile />} />
+          <Route path="/dashboard/crypto" element={<CryptoWallet />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<Navigate to="/admin/analytics" replace />} />

@@ -8,6 +8,7 @@ import {
   Bell,
   User,
   Settings,
+  Coins,
   LogOut,
   BarChart3,
   Users,
@@ -37,6 +38,7 @@ const Sidebar = ({ isAdmin }: SidebarProps) => {
   const userLinks = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Accounts", href: "/dashboard/accounts", icon: Wallet },
+    { name: "Crypto Wallet", href: "/dashboard/crypto", icon: Coins },
     { name: "Deposits", href: "/dashboard/deposits", icon: ArrowDownLeft },
     { name: "Transfers", href: "/dashboard/transfers", icon: Send },
     { name: "Cards", href: "/dashboard/cards", icon: CreditCard },
