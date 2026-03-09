@@ -54,8 +54,8 @@ const Login = () => {
       const response = await authService.login(values);
 
       // If backend already issues token (e.g. admin bypass OTP)
-      if (response.access_token) {
-        await setTokens(response.access_token);
+      if (response.token) {
+        await setTokens(response.token);
         localStorage.setItem("user", JSON.stringify(response.user));
         toast.success("Welcome back, Admin.");
         navigate("/admin");
@@ -93,7 +93,7 @@ const Login = () => {
         otp,
       });
 
-      await setTokens(response.access_token);
+      await setTokens(response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
       toast.success("Identity verified. Welcome back.");
@@ -103,7 +103,11 @@ const Login = () => {
       set_id(null);
       setShowOtpModal(false);
 
-      navigate("/dashboard");
+      if (response.user.role === 'admin') {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message ||
@@ -234,7 +238,7 @@ const Login = () => {
       {/* OTP MODAL */}
       <OtpModal
         isOpen={showOtpModal}
-        onClose={() => { }} // Prevent accidental close for banking security
+        onClose={() => setShowOtpModal(false)}
         onVerify={handleOtpVerify}
         emailOrPhone={loginData?.username || "your registered device"}
         loading={isOtpLoading}

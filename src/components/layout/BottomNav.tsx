@@ -9,7 +9,8 @@ import {
   CreditCard as PaymentIcon,
   Settings,
   ArrowDownLeft,
-  Coins
+  Coins,
+  History
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,8 @@ const BottomNav = ({ isAdmin }: BottomNavProps) => {
   const adminLinks = [
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Users", href: "/admin/accounts", icon: Users },
+    { name: "Transactions", href: "/admin/transactions", icon: History },
+    { name: "Cards", href: "/admin/cards", icon: CreditCard },
     { name: "Payments", href: "/admin/payment-methods", icon: PaymentIcon },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
