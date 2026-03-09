@@ -2,10 +2,10 @@ import { axiosAuthenticatedInstance } from './client';
 import { User, Account, Investment, Notification, AnalyticsOverview, CreateTransferPinDto, AdminCreditDebitDto, UpdateLimitDto, Transaction, Card, UpdateCardDto } from './types';
 
 export const adminService = {
-  updateUserTransferPin: (_id: string, data: CreateTransferPinDto) =>
-    axiosAuthenticatedInstance.patch<{ message: string }>(`/admin/users/${_id}/transfer-pin`, data),
+  updateUserTransferPin: (userId: string, data: CreateTransferPinDto) =>
+    axiosAuthenticatedInstance.patch<{ message: string }>(`/admin/users/${userId}/transfer-pin`, data),
 
-  getAccounts: (params?: { status?: string; type?: string; _id?: string }) => {
+  getAccounts: (params?: { status?: string; type?: string; userId?: string }) => {
     const query = new URLSearchParams(params as any).toString();
     const queryString = query ? `?${query}` : '';
     return axiosAuthenticatedInstance.get<Account[]>(`/admin/accounts${queryString}`);
@@ -27,7 +27,7 @@ export const adminService = {
   getAnalyticsOverview: () => axiosAuthenticatedInstance.get<AnalyticsOverview>('/admin/analytics/overview'),
   getUsers: () => axiosAuthenticatedInstance.get<User[]>('/admin/users'),
   getTransactions: () => axiosAuthenticatedInstance.get<Transaction[]>('/admin/transactions'),
-  getUserTransactions: (_id: string) => axiosAuthenticatedInstance.get<Transaction[]>(`/admin/users/${_id}/transactions`),
+  getUserTransactions: (userId: string) => axiosAuthenticatedInstance.get<Transaction[]>(`/admin/users/${userId}/transactions`),
 
   // Card Management
   getCards: () => axiosAuthenticatedInstance.get<Card[]>('/admin/cards'),

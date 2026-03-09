@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { authService } from "@/api/auth";
 
 const verifyEmailSchema = z.object({
-  _id: z.string().min(1, "User ID is required"),
+  userId: z.string().min(1, "User ID is required"),
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
@@ -37,7 +37,7 @@ const VerifyEmail = () => {
   const form = useForm<VerifyEmailFormValues>({
     resolver: zodResolver(verifyEmailSchema),
     defaultValues: {
-      _id: searchParams.get("_id") || "",
+      userId: searchParams.get("userId") || searchParams.get("_id") || "",
       otp: "",
     },
   });
@@ -74,7 +74,7 @@ const VerifyEmail = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="_id"
+              name="userId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>User ID</FormLabel>
