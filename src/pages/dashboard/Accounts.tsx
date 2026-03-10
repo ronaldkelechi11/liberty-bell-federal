@@ -19,7 +19,7 @@ const Accounts = () => {
     setIsLoading(true);
     try {
       const response = await accountService.getMyAccounts();
-      setAccounts(response.data || []);
+      setAccounts((Array.isArray(response) ? response : (response as any).data) || []);
     } catch (error) {
       console.error("Error fetching accounts:", error);
     } finally {

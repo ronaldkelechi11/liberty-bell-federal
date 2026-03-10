@@ -49,7 +49,7 @@ const Overview = () => {
         ]);
 
         setProfile(profileRes.data);
-        setAccounts(accountsRes.data || []);
+        setAccounts((Array.isArray(accountsRes) ? accountsRes : (accountsRes as any).data) || []);
         setCards(cardsRes.data || []);
         setTransactions(transactionsRes.data || []);
       } catch (error) {

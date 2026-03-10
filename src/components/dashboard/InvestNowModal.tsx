@@ -37,7 +37,7 @@ const InvestNowModal = ({ isOpen, onOpenChange, initialPlanId }: InvestNowModalP
             if (isOpen) {
                 try {
                     const response = await accountService.getMyAccounts();
-                    setAccounts(response.data || []);
+                    setAccounts((Array.isArray(response) ? response : (response as any).data) || []);
                 } catch (error) {
                     console.error("Error fetching accounts in modal:", error);
                 }
