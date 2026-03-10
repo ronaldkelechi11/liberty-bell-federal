@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +55,7 @@ const UserAccounts = () => {
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userAccounts, setUserAccounts] = useState<Account[]>([]);
   const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
   const [isActionPending, setIsActionPending] = useState(false);
@@ -71,7 +74,7 @@ const UserAccounts = () => {
   //   try {
   //     const response = await adminService.getUsers();
   //     console.log(response.data);
-  //     setUsers(response.data || []);
+  //     setUsers((Array.isArray(response) ? response : (response as any).data) || []);
   //   } catch (error) {
   //     console.error("Error fetching users:", error);
   //   } finally {
@@ -86,7 +89,7 @@ const UserAccounts = () => {
         const response = await adminService.getUsers();
         console.log(response.data);
 
-        setUsers(response.data || []);
+        setUsers((Array.isArray(response) ? response : (response as any).data) || []);
       } catch (error) {
         console.error("Error fetching users:", error);
       } finally {
@@ -123,6 +126,11 @@ const UserAccounts = () => {
     setSelectedUser(user);
     setIsAccountsModalOpen(true);
     fetchUserAccounts(userId);
+  };
+
+  const handleOpenProfile = (user: User) => {
+    setSelectedUser(user);
+    setIsProfileModalOpen(true);
   };
 
   const handleOpenTransactions = async (user: User) => {
@@ -208,7 +216,7 @@ const UserAccounts = () => {
   const fetchUserAccounts = async (userId: string) => {
     try {
       const response = await adminService.getAccounts({ userId });
-      setUserAccounts(response.data || []);
+      setUserAccounts((Array.isArray(response) ? response : (response as any).data) || []);
     } catch (error) {
       toast.error("Failed to fetch user accounts");
     }
@@ -372,7 +380,10 @@ const UserAccounts = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 shadow-xl">
-                                <DropdownMenuItem className="gap-2 rounded-lg cursor-pointer"><UserIcon className="w-4 h-4" /> View Profile</DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="gap-2 rounded-lg cursor-pointer"
+                                  onClick={() => handleOpenProfile(u)}
+                                ><UserIcon className="w-4 h-4" /> View Profile</DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2 rounded-lg cursor-pointer"
                                   onClick={() => handleOpenTransactions(u)}
@@ -681,6 +692,68 @@ const UserAccounts = () => {
               Update PIN
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Profile Modal */}
+      <Dialog open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <UserIcon className="w-6 h-6 text-primary" /> User Profile
+            </DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-6 py-4">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="w-24 h-24 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-3xl border-4 border-primary/20">
+                  {selectedUser.profilePicture ? (
+                    <img src={selectedUser.profilePicture} alt={`${selectedUser.firstname} ${selectedUser.lastname}`} className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    <span>{selectedUser.firstname?.[0]}{selectedUser.lastname?.[0]}</span>
+                  )}
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold">{selectedUser.firstname} {selectedUser.lastname}</h3>
+                  <p className="text-sm text-muted-foreground">@{selectedUser.username}</p>
+                  <div className="mt-2 flex items-center justify-center gap-2">
+                    <Badge variant={selectedUser.role === 'admin' ? 'default' : 'secondary'} className="uppercase">
+                      {selectedUser.role}
+                    </Badge>
+                    <Badge variant={selectedUser.isVerified ? 'default' : 'secondary'} className={selectedUser.isVerified ? "bg-emerald-500 hover:bg-emerald-600" : ""}>
+                      {selectedUser.isVerified ? 'Verified' : 'Unverified'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Email</p>
+                  <p className="text-sm font-medium break-all">{selectedUser.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Phone</p>
+                  <p className="text-sm font-medium">{selectedUser.phoneNumber || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Date of Birth</p>
+                  <p className="text-sm font-medium">{selectedUser.dob ? format(new Date(selectedUser.dob), 'MMM dd, yyyy') : 'N/A'} ({selectedUser.age} yrs)</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Marital Status</p>
+                  <p className="text-sm font-medium capitalize">{selectedUser.maritalStatus}</p>
+                </div>
+                <div className="col-span-2 pt-2">
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider mb-1">Address</p>
+                  <p className="text-sm font-medium">{selectedUser.streetAddress}</p>
+                  {selectedUser.apartment && <p className="text-sm font-medium">{selectedUser.apartment}</p>}
+                  <p className="text-sm font-medium">{selectedUser.city}, {selectedUser.state} {selectedUser.zipCode}</p>
+                  <p className="text-sm font-medium">{selectedUser.country}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
